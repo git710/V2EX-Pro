@@ -119,9 +119,11 @@ https://raw.githubusercontent.com/git710/V2EX-Pro/main/<目录>/<文件名>.user
 
 ## 从上游版本迁移
 
-PC 端衍生自 [zyronon/V2Next](https://github.com/zyronon/V2Next-script)，H5 端衍生自 [coolpace/V2EX Polish](https://github.com/coolpace/V2EX_Polish)。若此前装过上游脚本或 Greasy Fork 版本：
+PC 端衍生自 [zyronon/V2Next](https://github.com/zyronon/V2Next-script)。H5 端的情况是两层：官方 [coolpace/V2EX Polish](https://github.com/coolpace/V2EX_Polish) 本身不支持移动端，本项目的 H5 实现是在 [thinktip/V2ex-Polish-Plus](https://github.com/thinktip/V2ex-Polish-Plus) 这个移动端改造版基础上继续开发的。
 
-1. **脚本名与命名空间已变更**，不会自动覆盖。先在脚本管理器中删除或停用旧的 V2Next / V2EX Polish 条目，再安装本仓库脚本，避免同一功能被加载两次。
+若此前装过上述任一上游脚本或 Greasy Fork 版本：
+
+1. **脚本名与命名空间已变更**，不会自动覆盖。先在脚本管理器中删除或停用旧的 V2Next / V2EX Polish / V2EX Plus 条目，再安装本仓库脚本，避免同一功能被加载两次。
 2. **配置能否沿用取决于键名**：PC 配置在 `localStorage.v2ex-config`，H5 主题偏好在 `localStorage.user_preferred_theme_mode`。键名相同则配置保留，否则需重新设置。
 3. **用户标签**：登录后从当前站点的 V2EX 记事本读取；未登录时仅保存在本机。
 4. **文件命名已统一**为主脚本 `*.user.js` / 样式脚本 `*-style.user.js`，从旧版本升级请删除旧条目后重装。
@@ -220,13 +222,16 @@ node bump-version.mjs --dry-run
 本项目是已有开源工作的衍生实现，感谢以下作者与项目：
 
 - **[zyronon/V2Next](https://github.com/zyronon/V2Next-script)** —— PC 端实现基础。感谢原作者 [zyronon](https://github.com/zyronon)。
-- **[coolpace/V2EX Polish](https://github.com/coolpace/V2EX_Polish)** —— H5 端设计与实现参考。感谢原作者 [coolpace](https://github.com/coolpace)。
+- **[coolpace/V2EX Polish](https://github.com/coolpace/V2EX_Polish)** —— H5 端的原始设计与实现来源。感谢原作者 [coolpace](https://github.com/coolpace)。
+- **[thinktip/V2ex-Polish-Plus](https://github.com/thinktip/V2ex-Polish-Plus)** —— 把 V2EX Polish 改造成支持移动端的版本，本项目的 H5 端在其基础上继续开发。感谢作者 [thinktip](https://github.com/thinktip)。
 
 也感谢所有上游贡献者与 V2EX 社区。
 
 ## 许可
 
-本仓库以 **GPL-3.0** 发布，详见 [LICENSE](LICENSE)。代码衍生自上游 GPL 项目，故沿用同一许可证。二次分发需同样以 GPL-3.0 发布，并保留原作者 zyronon（V2Next）与 coolpace（V2EX Polish）的署名。
+本仓库以 **GPL-3.0** 发布，详见 [LICENSE](LICENSE)。二次分发需同样以 GPL-3.0 发布。
+
+代码衍生自多个上游项目，它们的许可情况并不一致：V2Next 未声明许可证，V2EX Polish 为 MIT。本项目选择以 GPL-3.0 发布，无论上游采用何种许可，均保留原作者 zyronon（V2Next）、coolpace（V2EX Polish）与 thinktip（V2ex-Polish-Plus）的署名与来源说明。
 
 ## 反馈
 
