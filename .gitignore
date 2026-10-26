@@ -1,0 +1,23 @@
+# 依赖与构建产物
+node_modules/
+dist/
+*.zip
+*.vsix
+*.crx
+
+# 用户本地配置：WebDAV 同步凭据等，切勿提交
+.env
+.env.*
+*.local.json
+webdav-config.json
+
+# 编辑器 / 操作系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# 日志与临时文件
+*.log
+npm-debug.log*
