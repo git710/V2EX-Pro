@@ -418,10 +418,10 @@
     );
     return true;
   };
-  // 登录态判定：顶栏出现「登出」或用户主页链接即认为已登录，不依赖用户名文本
+  // 登录态判定：兼容桌面端 (#Top .tools) 与移动端 (#menu-body、#site-header-menu、以及全局登出链接)
   const isLoggedIn = () =>
     !!document.querySelector(
-      '#Top .tools a[href*="/signout"], #Top .tools a[href^="/member/"]',
+      '#Top .tools a[href*="/signout"], #Top .tools a[href^="/member/"], #site-header-menu a[href*="/signout"], #site-header-menu a[href^="/member/"], #menu-body a[href*="/signout"], #menu-body a[href^="/member/"], header#site-header a[href*="/signout"], a[href*="/signout"]',
     );
 
   const isHomePage = () => location.pathname === "/";
@@ -441,19 +441,27 @@
     html.includes("已连续登录") ||
     html.includes("每日登录奖励已领取");
 
-  // 提取确切的兑换 URL：优先取官方按钮的 onclick，再退回整页正则
-  const extractRedeemUrl = (html) => {
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    const btn = doc.querySelector('input[value^="领取"]');
-    if (btn) {
-      const onclick = btn.getAttribute("onclick") || "";
-      const m = onclick.match(/'(\/mission\/daily\/redeem\?once=\d+)'/);
-      if (m && m[1]) return m[1];
+  // 提取确切的兑换 URL：与 PC 端保持高度一致，并加入移动端菜单兜底
+  const extractRedeemUrl = (dailyHtml) => {
+    const redeemMatch =
+      dailyHtml.match(/\/mission\/daily\/redeem\?once=\d+/) ||
+      dailyHtml.match(/location\.href\s*=\s*['"]([^'"]*redeem\?once=\d+)['"]/);
+    if (redeemMatch) {
+      const url = redeemMatch[1] || redeemMatch[0];
+      return url.startsWith("/") ? location.origin + url : url;
     }
-    const m =
-      html.match(/\/mission\/daily\/redeem\?once=\d+/) ||
-      html.match(/location\.href\s*=\s*['"]([^'"]*redeem\?once=\d+)['"]/);
-    return m ? m[0] : null;
+
+    // 兜底方案：从当前页面工具栏或移动端菜单寻找 once
+    const toolsEl = document.querySelector("#Top .tools, #menu-body, header#site-header");
+    const onceMatch =
+      (toolsEl ? toolsEl.innerHTML.match(/once=(\d+)/) : null) ||
+      dailyHtml.match(/once=(\d+)/);
+    if (onceMatch) {
+      const onceToken = onceMatch[1] ? `once=${onceMatch[1]}` : onceMatch[0];
+      return `${location.origin}/mission/daily/redeem?${onceToken}`;
+    }
+
+    return null;
   };
 
   async function qianDao() {
@@ -461,28 +469,37 @@
 
     const timeNow = getClockInDate();
 
-    // 1. 今天已签到（可能是本端，也可能是 PC 端），直接略过，不发任何请求
+    // 1. 如果本地记录今天已签过到，直接略过，不发网络请求，不弹任何提示
     if (localStorage.getItem(CLOCK_IN_TIME_KEY) === timeNow) return;
 
-    // 2. 与 PC 端一致：首页有特别奖励入口就直接点掉
+    // 2. 如果在首页且有特别奖励入口就直接点掉
     if (isHomePage()) {
       const gift = document.getElementById("gift_v2excellent");
       if (gift) {
         gift.click();
         localStorage.setItem(CLOCK_IN_TIME_KEY, timeNow);
         setTimeout(() => v2pShowToast("已自动领取特别奖励！"), 500);
+        setTimeout(() => {
+          const $giftBox = $(gift).closest(".box");
+          if (
+            $giftBox.length &&
+            $giftBox.find('.avatar, a[href^="/member/"]').length === 0
+          ) {
+            $giftBox.slideUp(350, () => $giftBox.remove());
+          }
+        }, 3500);
         return;
       }
-      // 首页没有「领取今日的登录奖励」入口但已登录，说明今日已在别处签到，静默记录即可
-      const entry = document.querySelector('.box .inner a[href="/mission/daily"]');
+      // 桌面端模板兼容：首页没有签到入口但已登录，说明今日已在其他端完成签到
+      const qiandaoEntry = document.querySelector('.box .inner a[href="/mission/daily"]');
       const userBox = document.querySelector("#Rightbar .box .inner");
-      if (!entry && userBox) {
+      if (!qiandaoEntry && userBox) {
         localStorage.setItem(CLOCK_IN_TIME_KEY, timeNow);
         return;
       }
     }
 
-    // 3. 并发防重锁，避免重复请求
+    // 3. 并发防重锁（防止多标签页同时并发签到）
     if (sessionStorage.getItem(SIGNING_LOCK_KEY) === timeNow) return;
     sessionStorage.setItem(SIGNING_LOCK_KEY, timeNow);
 
@@ -496,62 +513,113 @@
   }
 
   async function doAutoSignIn(timeNow) {
-    // 第一步：探测 /mission/daily 页面状态，精准判断是否需要签到并获取权威的 once= 参数
-    const dailyRes = await fetch(location.origin + "/mission/daily", {
-      credentials: "same-origin",
-    });
+    // 第一步：探测 /mission/daily 页面状态，精准判断是否需要签到并获取权威的 redeem?once= 参数
+    let dailyRes;
+    try {
+      dailyRes = await fetch(location.origin + "/mission/daily", {
+        credentials: "same-origin",
+      });
+    } catch (err) {
+      console.warn("[V2EX Pro] 请求 /mission/daily 失败:", err);
+      return;
+    }
+
     if (!dailyRes.ok) return;
 
     const dailyHtml = await dailyRes.text();
 
-    // 正向判断：页面上有领取按钮才需要签到
+    // 判断是否已经签过到（页面出现“每日登录奖励已领取”或没有“领取”按钮）
     const hasRedeemBtn =
       dailyHtml.includes('value="领取') ||
       dailyHtml.includes("mission/daily/redeem");
     if (!hasRedeemBtn) {
-      // 今日已领取：静默记录本地时间戳，不弹任何提示
+      // 已签到过：直接略过，静默记录本地时间戳，不弹任何提示
       localStorage.setItem(CLOCK_IN_TIME_KEY, timeNow);
+      console.info("[V2EX Pro] 检测到今日已完成签到，静默跳过。");
       return;
     }
 
+    // 第二步：提取确切的兑换 URL
     const redeemUrl = extractRedeemUrl(dailyHtml);
     if (!redeemUrl) {
       console.warn("[V2EX Pro] 无法获取签到 redeem URL！");
       return;
     }
 
-    // 第二步：发起签到兑换请求
-    const redeemRes = await fetch(
-      redeemUrl.startsWith("/") ? location.origin + redeemUrl : redeemUrl,
-      { credentials: "same-origin" },
-    );
-    const redeemHtml = await redeemRes.text();
-
-    // 第三步：必须校验兑换结果页，失败时不写本地标记，留待下次访问重试
-    if (!isRedeemSuccess(redeemHtml)) {
-      console.warn("[V2EX Pro] 自动签到未确认成功，可尝试手动签到。");
+    // 第三步：发起签到兑换请求
+    let redeemRes;
+    try {
+      redeemRes = await fetch(redeemUrl, { credentials: "same-origin" });
+    } catch (err) {
+      console.warn("[V2EX Pro] 签到兑换请求失败:", err);
       return;
     }
 
-    localStorage.setItem(CLOCK_IN_TIME_KEY, timeNow);
-    const days = parseDays(redeemHtml);
-    let message = days
-      ? `自动签到成功！已连续登录 ${days} 天`
-      : "自动签到成功！";
+    if (!redeemRes.ok) return;
 
-    // 附加信息：本次奖励铜币数（失败不影响签到结果）
-    try {
-      const balanceHtml = await fetch(location.origin + "/balance", {
-        credentials: "same-origin",
-      }).then((r) => r.text());
-      const coins = parseCoins(balanceHtml);
-      if (coins) message += `，本次 ${coins} 铜币`;
-    } catch (e) {
-      /* 静默：仅影响提示文案 */
+    const resultHtml = await redeemRes.text();
+    const isSuccess = isRedeemSuccess(resultHtml);
+
+    if (isSuccess) {
+      localStorage.setItem(CLOCK_IN_TIME_KEY, timeNow);
+      const days = parseDays(resultHtml);
+      let successMsg = days
+        ? `自动签到成功！已连续登录 ${days} 天`
+        : "自动签到成功！";
+
+      // 附加信息：本次奖励铜币数（失败不影响签到结果）
+      try {
+        const balanceHtml = await fetch(location.origin + "/balance", {
+          credentials: "same-origin",
+        }).then((r) => r.text());
+        const coins = parseCoins(balanceHtml);
+        if (coins) successMsg += `，本次 ${coins} 铜币`;
+      } catch (e) {
+        /* 静默：仅影响提示文案 */
+      }
+
+      console.info("[V2EX Pro] " + successMsg);
+
+      // 如果当前页面上有签到入口，更新其文字
+      const qiandao = document.querySelector('a[href="/mission/daily"], input[value^="领取"]');
+      if (qiandao) {
+        if (qiandao.tagName === "INPUT") {
+          qiandao.value = successMsg;
+          qiandao.disabled = true;
+        } else {
+          qiandao.textContent = successMsg;
+          qiandao.href = "javascript:void(0);";
+
+          // 顶部横幅优化：签到成功展示 3.5 秒后自动平滑收起隐藏，保持页面清爽
+          setTimeout(() => {
+            const $target = $(qiandao);
+            const $box = $target.closest(".box");
+            if (
+              $box.length &&
+              $box.find('.avatar, a[href^="/member/"]').length === 0
+            ) {
+              $box.slideUp(350, () => $box.remove());
+            } else {
+              const $cell = $target.closest(".cell, .inner");
+              if ($cell.length && $cell.text().trim() === successMsg) {
+                $cell.slideUp(350, () => $cell.remove());
+              } else {
+                $target.fadeOut(350, () => $target.remove());
+              }
+            }
+          }, 3500);
+        }
+      }
+
+      // 自动签到成功后弹出友好提示（已经签到过则不弹）
+      setTimeout(() => v2pShowToast(successMsg), 500);
+    } else {
+      console.warn("[V2EX Pro] 自动签到未确认成功，可尝试手动签到。");
+      const qiandao = document.querySelector('a[href="/mission/daily"]');
+      if (qiandao) {
+        qiandao.textContent = "自动签到未成功，请手动签到";
+      }
     }
-
-    console.info("[V2EX Pro] " + message);
-    setTimeout(() => v2pShowToast(message), 500);
   }
 
   // 顶栏异步渲染，轮询等待登录态出现（最多 3 秒）
@@ -2648,7 +2716,8 @@ var init_button = __esm({
 
 // src/components/modal.ts
 function createModal(props) {
-  const { root, title, onMount, onOpen, onClose } = props;
+  const { root, title, size, className, onMount, onOpen, onClose } = props;
+  const isCard = size === "card";
   const $mask = $('<div class="v2p-modal-mask">');
   const $content = $('<div class="v2p-modal-content">');
   const $closeBtn = createButton({
@@ -2663,6 +2732,31 @@ function createModal(props) {
     .on("click", (ev) => {
       ev.stopPropagation();
     });
+
+  if (isCard) {
+    $mask.addClass("v2p-modal-mask--center").css({
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "16px",
+      boxSizing: "border-box",
+    });
+    $main2.addClass("v2p-modal-main--card").css({
+      width: "min(400px, 92vw)",
+      height: "auto",
+      maxHeight: "85vh",
+      margin: "auto",
+      borderRadius: "12px",
+      boxShadow: "0 12px 36px rgba(0, 0, 0, 0.35)",
+      display: "flex",
+      flexDirection: "column",
+      backgroundColor: "var(--v2p-color-bg-content, #fff)",
+    });
+  }
+  if (className) {
+    $main2.addClass(className);
+  }
+
   const $container = $mask.append($main2).hide();
   const modalElements = {
     $mask,
@@ -2687,6 +2781,11 @@ function createModal(props) {
       handleModalClose();
     }
   };
+  const maskClickHandler = (ev) => {
+    if (ev.target === $mask.get(0)) {
+      handleModalClose();
+    }
+  };
   const keyupHandler = (ev) => {
     if (ev.key === "Escape") {
       handleModalClose();
@@ -2695,10 +2794,18 @@ function createModal(props) {
   const handleModalClose = () => {
     $mask.off("mousedown", mouseDownHandler);
     $mask.off("mouseup", mouseUpHandler);
+    $mask.off("click", maskClickHandler);
     $(document).off("keydown", keyupHandler);
     boundEvent = false;
-    $container.fadeOut("fast");
-    document.body.classList.remove("v2p-modal-open");
+    $container.fadeOut("fast", () => {
+      // 仅在页面上没有其他打开的弹窗时，才移除 body 滚动锁定
+      if ($(".v2p-modal-mask:visible").not($container).length === 0) {
+        document.body.classList.remove("v2p-modal-open");
+      }
+    });
+    if ($(".v2p-modal-mask:visible").not($container).length === 0) {
+      document.body.classList.remove("v2p-modal-open");
+    }
     onClose?.(modalElements);
   };
   const handleModalOpen = () => {
@@ -2707,10 +2814,16 @@ function createModal(props) {
       $closeBtn.on("click", handleModalClose);
       onMount?.(modalElements);
     }
+    // 动态递增 z-index，避免多层弹窗同层遮挡（Toast 为 999）
+    const baseZ = 888;
+    const activeModals = $(".v2p-modal-mask:visible").not($container).length;
+    $mask.css("z-index", String(baseZ + activeModals * 20));
+
     setTimeout(() => {
       if (!boundEvent) {
         $mask.on("mousedown", mouseDownHandler);
         $mask.on("mouseup", mouseUpHandler);
+        $mask.on("click", maskClickHandler);
         $(document).on("keydown", keyupHandler);
         boundEvent = true;
       }
@@ -3255,6 +3368,7 @@ function createMemberTagModal() {
   return createModal({
     root: $body,
     title: "用户标签",
+    size: "card",
     onMount({ $content }) {
       $content.append(`
         <div class="v2p-tag-editor">
@@ -7200,6 +7314,78 @@ function applyLiveOption(path, value) {
   }
 }
 
+let testMessageModal = null;
+function openTestMessageModal() {
+  if (!testMessageModal) {
+    testMessageModal = createModal({
+      root: $body,
+      title: "📱 消息弹框测试",
+      size: "card",
+      onMount({ $actions }) {
+        $actions.find(".v2p-modal-close-btn kbd").remove();
+      },
+      onOpen({ $content }) {
+        const d = new Date();
+        const pad = (n) => String(n).padStart(2, "0");
+        const timeStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        const isDark =
+          document.body.classList.contains("v2p-theme-dark") ||
+          document.documentElement.classList.contains("dark") ||
+          (window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches);
+        const touchSupported =
+          "ontouchstart" in window ||
+          (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+
+        $content.html(`
+          <div class="v2p-test-modal-body" style="padding: 16px 20px 20px; font-size: 14px; line-height: 1.6;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+              <span style="font-size: 32px; line-height: 1;">🎉</span>
+              <div>
+                <div style="font-weight: 600; font-size: 16px; color: var(--v2p-color-font-primary, inherit);">移动端弹框触发成功</div>
+                <div style="font-size: 12px; color: var(--v2p-color-font-tertiary, #888);">V2EX Pro (H5) Mobile Dialog Test</div>
+              </div>
+            </div>
+
+            <p style="margin: 0 0 12px; color: var(--v2p-color-font-secondary, inherit);">
+              你好！这是一条来自 V2EX Pro 的测试消息。如果你在手机浏览器中看到了这个弹窗，说明视口居中、遮罩定位与多层级弹窗均运行正常！
+            </p>
+
+            <div style="background: rgba(128, 128, 128, 0.08); border: 1px solid var(--v2p-color-divider, rgba(128, 128, 128, 0.15)); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 12px; line-height: 1.8; color: var(--v2p-color-font-secondary, inherit);">
+              <div><strong>📅 当前时间：</strong>${timeStr}</div>
+              <div><strong>📐 屏幕视口：</strong>${window.innerWidth} × ${window.innerHeight} (DPR: ${window.devicePixelRatio || 1})</div>
+              <div><strong>👆 触控环境：</strong>${touchSupported ? "支持触摸屏 (Touch Device)" : "标准设备 (Mouse/Desktop)"}</div>
+              <div><strong>🌓 主题外观：</strong>${isDark ? "深色模式 (Dark)" : "浅色模式 (Light)"}</div>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="normal button v2p-test-toast-action" style="cursor: pointer;">
+                测试 Toast 提示
+              </button>
+              <button type="button" class="super normal button v2p-test-close-action" style="cursor: pointer;">
+                我知道了
+              </button>
+            </div>
+          </div>
+        `);
+
+        $content.find(".v2p-test-toast-action").on("click", () => {
+          createToast({
+            message: "🎉 Toast 浮动轻提示在手机端也能正常显示！",
+            type: "success",
+          });
+        });
+
+        $content.find(".v2p-test-close-action").on("click", () => {
+          testMessageModal.close();
+        });
+      },
+    });
+  }
+  testMessageModal.open();
+}
+window.v2pOpenTestMessageModal = openTestMessageModal;
+
 function renderOptionSettings($container, options) {
   $container.empty();
   OPTION_SETTING_GROUPS.forEach((group) => {
@@ -7247,6 +7433,39 @@ function renderOptionSettings($container, options) {
     });
     $container.append($group);
   });
+  // 调试与测试（默认隐藏，DOM 中保留，可通过修改 CSS display 展开）
+  const $testGroup = $(
+    '<div class="v2p-settings-group v2p-debug-test-group" id="v2p-debug-test-group" style="display: none;">'
+  );
+  $testGroup.append(
+    $('<div class="v2p-settings-group-title">').text("调试与测试")
+  );
+  const $testRow = $(
+    '<div class="v2p-settings-row v2p-settings-test-row" style="justify-content: flex-start; gap: 10px; flex-wrap: wrap; padding-top: 6px; border-top: 0;">'
+  );
+  const $testModalBtn = $(
+    '<button type="button" class="normal button v2p-test-modal-btn" style="cursor: pointer;">'
+  ).text("测试弹出消息弹框");
+  const $testToastBtn = $(
+    '<button type="button" class="normal button v2p-test-toast-btn" style="cursor: pointer;">'
+  ).text("测试 Toast 提示");
+
+  $testModalBtn.on("click", (ev) => {
+    ev.preventDefault();
+    openTestMessageModal();
+  });
+  $testToastBtn.on("click", (ev) => {
+    ev.preventDefault();
+    createToast({
+      message: "这是一条来自脚本设置的测试 Toast 提示！",
+      type: "success",
+    });
+  });
+
+  $testRow.append($testModalBtn, $testToastBtn);
+  $testGroup.append($testRow);
+  $container.append($testGroup);
+
   $container.append(
     $('<div class="v2p-settings-note">').text(
       "设置保存在本机；阅读类开关会即时生效，结构性选项刷新页面后生效。",

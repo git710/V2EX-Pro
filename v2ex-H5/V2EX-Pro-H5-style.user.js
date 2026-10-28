@@ -3088,6 +3088,37 @@ body #Logo.v2p-logo {
     line-height: 1.5;
     color: var(--v2p-color-font-tertiary, #999);
 }
+/* 调试与测试按钮区域 */
+.v2p-settings-test-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding-top: 6px;
+    border-top: 0;
+}
+.v2p-test-modal-body {
+    padding: 16px 20px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+/* 卡片式居中自适应弹窗 */
+.v2p-modal-mask--center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+}
+.v2p-modal-main--card {
+    width: min(400px, 92vw);
+    height: auto;
+    max-height: 85vh;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    background-color: var(--v2p-color-bg-content);
+}
 /* 用户标签编辑弹窗 */
 .v2p-tag-editor {
     width: min(88vw, 380px);
