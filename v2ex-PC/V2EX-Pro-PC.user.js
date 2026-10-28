@@ -883,6 +883,53 @@
     feedback() {
       functions.openNewTab(DefaultVal.issue);
     },
+    /**
+     * 判断主机名是否为 V2EX 官方或镜像站
+     */
+    isV2exHost(hostname) {
+      return /(^|\.)v2ex\.(com|co)$/i.test(String(hostname || ""));
+    },
+    /**
+     * 判断链接是否为外部链接（非 V2EX 官方站、非镜像站、非当前站、非内部锚点/脚本）。
+     */
+    isExternalLink(href) {
+      if (!href || typeof href !== "string") return false;
+      let trimmed = href.trim();
+      if (
+        !trimmed ||
+        trimmed.startsWith("#") ||
+        trimmed.startsWith("javascript:") ||
+        trimmed.startsWith("mailto:") ||
+        trimmed.startsWith("tel:")
+      ) {
+        return false;
+      }
+      try {
+        let url = new URL(trimmed, window.location.href);
+        if (url.protocol !== "http:" && url.protocol !== "https:") {
+          return false;
+        }
+        let host = url.hostname.toLowerCase();
+        let currentHost = window.location.hostname.toLowerCase();
+        if (host === currentHost || functions.isV2exHost(host)) {
+          return false;
+        }
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    applyExternalLinkTargets(context) {
+      if (window.config && window.config.openExternalLinkInNewTab === false) return;
+      let root = context || document;
+      $(root).find("a[href]").each((_, el) => {
+        let href = el.getAttribute("href");
+        if (functions.isExternalLink(href)) {
+          el.setAttribute("target", "_blank");
+          el.setAttribute("rel", "noopener noreferrer");
+        }
+      });
+    },
     //检测页面类型
     checkPageType(a) {
       let l = a || window.location;
@@ -891,6 +938,9 @@
         pageData: { id: "", pageNo: null },
         username: "",
       };
+      if (a && functions.isExternalLink(a.href)) {
+        return data;
+      }
       if (l.pathname === "/") {
         data.pageType = PageType.Home;
       } else if (l.pathname === "/changes") {
@@ -1143,6 +1193,8 @@
         newTabOpen: false,
         //新标签打开
         newTabOpenActive: false,
+        openExternalLinkInNewTab: true,
+        //外链新标签页打开
         base64: true,
         //base功能
         sov2ex: false,
@@ -4618,6 +4670,33 @@
                                     ],
                                     -1,
                                   )),
+                              ]),
+                              vue.createElementVNode("div", _hoisted_22$1, [
+                                vue.createElementVNode("div", _hoisted_23$1, [
+                                  vue.createElementVNode(
+                                    "label",
+                                    { class: "item-title" },
+                                    "外链新标签页打开",
+                                  ),
+                                  vue.createElementVNode("div", _hoisted_24$1, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue: $data.config.openExternalLinkInNewTab,
+                                        "onUpdate:modelValue": ($event) =>
+                                          ($data.config.openExternalLinkInNewTab = $event),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode(
+                                  "div",
+                                  { class: "desc" },
+                                  " 网页上的外部链接（非本站与镜像站）默认在新标签页中打开 ",
+                                ),
                               ]),
                               vue.createElementVNode("div", _hoisted_22$1, [
                                 vue.createElementVNode("div", _hoisted_23$1, [
@@ -11527,6 +11606,17 @@
         let that = this;
         if (e2.currentTarget.getAttribute("script")) return;
         if (that.stopMe) return true;
+        let currentHref = e2.currentTarget.href;
+        if (functions.isExternalLink(currentHref)) {
+          if (that.config.openExternalLinkInNewTab ?? true) {
+            functions.stopEvent(e2);
+            functions.openNewTab(
+              currentHref,
+              that.config.newTabOpenActive,
+            );
+            return;
+          }
+        }
         let { pageType } = functions.checkPageType(e2.currentTarget);
         let { href, id, title } = functions.parseA(e2.currentTarget);
         switch (pageType) {

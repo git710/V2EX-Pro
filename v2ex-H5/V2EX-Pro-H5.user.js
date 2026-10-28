@@ -1160,6 +1160,7 @@ var init_constants = __esm({
       // 靠它区分扩展环境与用户脚本环境。
     defaultOptions = {
       openInNewTab: false,
+      openExternalLinkInNewTab: true,
       contentAutoCollapse: true,
       reply: {
         layout: "vertical",
@@ -1418,6 +1419,64 @@ async function setStorage(storageKey, storageItem) {
  */
 function isV2exHost(hostname) {
   return /(^|\.)v2ex\.(com|co)$/i.test(String(hostname || ""));
+}
+
+/**
+ * 判断链接是否为外部链接（非 V2EX 官方站、非镜像站、非当前站、非内部锚点/脚本）。
+ */
+function isExternalLink(href) {
+  if (!href || typeof href !== "string") return false;
+  const trimmed = href.trim();
+  if (
+    !trimmed ||
+    trimmed.startsWith("#") ||
+    trimmed.startsWith("javascript:") ||
+    trimmed.startsWith("mailto:") ||
+    trimmed.startsWith("tel:")
+  ) {
+    return false;
+  }
+  try {
+    const url = new URL(trimmed, window.location.href);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return false;
+    }
+    const host = url.hostname.toLowerCase();
+    const currentHost = window.location.hostname.toLowerCase();
+    if (host === currentHost || isV2exHost(host)) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+function applyExternalLinkTargets($context) {
+  const options = window.__V2P_StorageCache?.options || defaultOptions;
+  if (options && options.openExternalLinkInNewTab === false) return;
+  const $target = $context && $context.length ? $context : $(document.body);
+  $target.find("a[href]").each((_, el) => {
+    const href = el.getAttribute("href");
+    if (isExternalLink(href)) {
+      el.setAttribute("target", "_blank");
+      el.setAttribute("rel", "noopener noreferrer");
+    }
+  });
+}
+function bindExternalLinkHandler() {
+  if ($(document).data("v2p-external-link-bound")) return;
+  $(document).data("v2p-external-link-bound", true);
+  $(document).on("click.v2p-external-link", "a[href]", function (ev) {
+    if (ev.isDefaultPrevented()) return;
+    if (ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) return;
+    const options = window.__V2P_StorageCache?.options || defaultOptions;
+    if (options && options.openExternalLinkInNewTab === false) return;
+    const href = this.getAttribute("href");
+    if (isExternalLink(href)) {
+      this.setAttribute("target", "_blank");
+      this.setAttribute("rel", "noopener noreferrer");
+    }
+  });
 }
 var V2EX_ORIGIN;
 var init_utils = __esm({
@@ -2338,6 +2397,7 @@ function decodeBase64TopicPage() {
       );
     };
     $commentCells2.find(".reply_content").each(contentHandler);
+    applyExternalLinkTargets($commentCells2);
     $topicContentBox2.find(".topic_content").each(contentHandler);
     if (count === 0) {
       createToast({
@@ -2501,6 +2561,8 @@ var init_common = __esm({
       $body.addClass("v2p-mobile");
       document.documentElement.classList.add("v2p-mobile");
     }
+    bindExternalLinkHandler();
+    applyExternalLinkTargets();
     void (async () => {
       const isBrowserExt = isBrowserExtension();
       const storage = await getStorage();
@@ -2892,6 +2954,8 @@ function handleContent() {
       .find(".topic_content a[href]")
       .prop("target", "_blank")
       .prop("rel", "noopener noreferrer");
+  } else if (options.openExternalLinkInNewTab ?? true) {
+    applyExternalLinkTargets($topicContentBox);
   }
   {
     const $topicContents = $topicContentBox.find(
@@ -3309,6 +3373,7 @@ function updateMemberTag() {
   });
   updateTopReplyMemberTags();
   loadIcons();
+  applyExternalLinkTargets($box);
 }
 // 高赞回复卡片是用户名副本，单独补一次标签（不挂打标签按钮）
 function updateTopReplyMemberTags() {
@@ -6794,6 +6859,7 @@ async function handleComments() {
     console.error("加载高赞回复失败：", err);
   });
   bindReplyReferenceJump();
+  applyExternalLinkTargets($commentBox);
   {
     const $opAvatar = $topicHeader.find(".avatar");
     const $opName = $topicHeader.find('.gray a[href^="/member"]');
@@ -7200,6 +7266,12 @@ const OPTION_SETTING_GROUPS = [
     title: "阅读",
     items: [
       {
+        path: "openExternalLinkInNewTab",
+        label: "外链新标签页打开",
+        type: "checkbox",
+        live: true,
+      },
+      {
         path: "contentAutoCollapse",
         label: "正文超长自动折叠",
         type: "checkbox",
@@ -7290,6 +7362,19 @@ function findOptionSetting(path) {
 }
 
 function applyLiveOption(path, value) {
+  if (path === "openExternalLinkInNewTab") {
+    if (value) {
+      applyExternalLinkTargets();
+    } else {
+      $("a[href]").each((_, el) => {
+        const href = el.getAttribute("href");
+        if (isExternalLink(href) && el.getAttribute("target") === "_blank") {
+          el.removeAttribute("target");
+        }
+      });
+    }
+    return;
+  }
   if (path === "replyContent.hideReplyTime") {
     $(".cell .ago").toggleClass("v2p-auto-hide", !!value);
     if (typeof $commentCells !== "undefined" && $commentCells?.length) {
