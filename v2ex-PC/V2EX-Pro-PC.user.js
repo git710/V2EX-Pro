@@ -6578,6 +6578,42 @@
             // $.post(url, {content: submit_content, once: 123}).then(
             (res) => {
               loading.value = false;
+              // V2EX 回帖接口现已返回 JSON（如 {"reply_id":"","success":true,"url":"/t/xxx?p=x"}），
+              // jQuery 会将其解析为对象，直接走字符串匹配会抛 TypeError 并被 .catch 静默吞掉，
+              // 导致页面无任何反应。这里先兼容 JSON 返回，再回退到旧版 HTML 处理。
+              let resData = res;
+              if (typeof res === "string") {
+                let trimmed = res.trim();
+                if (trimmed.startsWith("{")) {
+                  try {
+                    resData = JSON.parse(trimmed);
+                  } catch (e2) {
+                    resData = res;
+                  }
+                }
+              }
+              if (resData && typeof resData === "object") {
+                if (resData.success) {
+                  content.value = replyInfo;
+                  emits("close");
+                  eventBus.emit(CMD.REFRESH_ONCE, resData.once);
+                  eventBus.emit(CMD.SHOW_MSG, {
+                    type: "success",
+                    text: "回复成功",
+                  });
+                  eventBus.emit(CMD.ADD_REPLY, item);
+                } else {
+                  // 失败时 message 一般形如“你上一条回复的内容和这条相同”等
+                  eventBus.emit(CMD.SHOW_MSG, {
+                    type: "error",
+                    text:
+                      resData.message ||
+                      resData.error ||
+                      "回复失败，请稍后重试",
+                  });
+                }
+                return;
+              }
               let r2 = res.search("你上一条回复的内容和这条相同");
               if (r2 > -1)
                 return eventBus.emit(CMD.SHOW_MSG, {
