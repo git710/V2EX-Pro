@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - H5
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.0
+// @version      1.0.1
 // @description  V2EX 网页增强脚本（移动端 H5）：四套主题、回复定位与预览、楼层直达、用户标签、高赞回复、楼中楼优化、表情回复、整页 Base64 解析、节点导航自定义、WebDAV 配置同步、自动签到。须与「V2EX Pro - H5 style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（移动端 H5）：四套主题、回复定位与预览、楼层直达、用户标签、高赞回复、楼中楼优化、表情回复、整页 Base64 解析、节点导航自定义、WebDAV 配置同步、自动签到。须与「V2EX Pro - H5 style」样式脚本一同启用。
 // @author       git710
@@ -6722,33 +6722,8 @@ function processActions($cellDom, data) {
   thankArea.remove();
   const floorNum = $actions.find(".no").clone();
 
-  $reply.on("click", () => {
-    const replyVal = $replyTextArea.val();
-    if (typeof replyVal === "string" && replyVal.length > 0) {
-      const floor = floorNum.text();
-      const replyComment = commentDataList.find((it) => it.floor === floor);
-      if (replyComment) {
-        const replyMemberName = replyComment.memberName;
-        const moreThanOneReply =
-          commentDataList.findIndex(
-            (it) => it.memberName === replyMemberName && it.floor !== floor,
-          ) !== -1;
-        if (moreThanOneReply) {
-          insertTextToReplyInput(`#${floor} `);
-        } else {
-          const $page = $(".v2p-paging")
-            .eq(0)
-            .find(".page_normal, .page_current");
-          if ($page.length > 1) {
-            const onLastPage = $page.last().hasClass("page_current");
-            if (!onLastPage) {
-              insertTextToReplyInput(`#${floor} `);
-            }
-          }
-        }
-      }
-    }
-  });
+  // ★ 回复行为与 V2EX 原版对齐：原版点击回复通过 a[onclick="replyOne('xxx')"] 已自动写入 @username
+  // 不再额外追加 `#${floor} `，保持与原版参数 content 一致（仅 @username，不带楼层号）
 
   // ★ 移动端：点击某一楼（包括楼中楼）高亮这一楼的工具栏
   if (

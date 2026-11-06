@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.0
+// @version      1.0.1
 // @description  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @author       git710
@@ -6405,6 +6405,7 @@
     props: {
       replyUser: null,
       replyFloor: null,
+      replyInfo: null,
       useType: {
         type: String,
         default() {
@@ -6415,8 +6416,21 @@
     emits: ["close"],
     setup(__props, { expose: __expose, emit: __emit }) {
       const props = __props;
-      const { replyUser, replyFloor, useType } = props;
-      const replyInfo = replyUser ? `@${replyUser} #${replyFloor} ` : "";
+      const { useType } = props;
+      let replyUser = props.replyUser || "";
+      let replyFloor = props.replyFloor || "";
+      let replyInfo = props.replyInfo || "";
+      if (!replyUser && replyInfo) {
+        let m = replyInfo.match(/@([a-zA-Z0-9_]+)/);
+        if (m) replyUser = m[1];
+      }
+      if (!replyFloor && replyInfo) {
+        let m = replyInfo.match(/#(\d+)/);
+        if (m) replyFloor = m[1];
+      }
+      if (replyUser) {
+        replyInfo = `@${replyUser} `;
+      }
       const emits = __emit;
       const post = vue.inject("post");
       const show = vue.inject("show");
@@ -6522,7 +6536,21 @@
             return match;
           },
         );
-        let show_content = content.value.replace(
+        let targetUser = replyUser;
+        if (!targetUser && replyInfo) {
+          let m = replyInfo.match(/@([a-zA-Z0-9_]+)/);
+          if (m) targetUser = m[1];
+        }
+        let contentForShow = content.value;
+        if (useType === "reply-comment" && targetUser) {
+          let userCallRegex = new RegExp(`@${targetUser}(?=[\\s#]|$)`);
+          if (!userCallRegex.test(submit_content)) {
+            let callPrefix = `@${targetUser} `;
+            submit_content = callPrefix + submit_content.trimStart();
+            contentForShow = callPrefix + contentForShow.trimStart();
+          }
+        }
+        let show_content = contentForShow.replace(
           /https?:\/\/(i\.)?imgur\.com\/((?!http).)+\.(gif|png|jpg|jpeg|GIF|PNG|JPG|JPEG)/g,
           function (match) {
             return `<img src="${match}" data-originUrl="${match}" data-notice="这个img标签由v2ex-超级增强脚本解析" style="max-width: 100%">`;
@@ -6561,7 +6589,7 @@
           floor: post.value.replyCount + 1,
           reply_content: show_content ?? "",
           children: [],
-          replyUsers: replyUser ? [replyUser] : [],
+          replyUsers: targetUser ? [targetUser] : (replyUser ? [replyUser] : []),
           replyFloor: replyFloor || -1,
           level: useType === "reply-comment" ? 1 : 0,
         };
@@ -6857,7 +6885,11 @@
             this.style.height = this.scrollHeight + "px";
           });
         if (useType === "reply-comment") {
-          txtRef.value && txtRef.value.focus();
+          if (txtRef.value) {
+            txtRef.value.focus();
+            let len = (content.value || "").length;
+            txtRef.value.setSelectionRange(len, len);
+          }
         }
       });
       vue.onBeforeUnmount(() => {
@@ -7268,8 +7300,11 @@
       return {
         expand: true,
         edit: false,
-        replyInfo: `@${this.modelValue.username} #${this.modelValue.floor} `,
-        floor: this.modelValue.floor,
+        replyInfo:
+          this.modelValue && this.modelValue.username
+            ? `@${this.modelValue.username} `
+            : "",
+        floor: this.modelValue ? this.modelValue.floor : "",
       };
     },
     watch: {
@@ -7358,9 +7393,20 @@
                     onClose:
                       _cache[2] ||
                       (_cache[2] = ($event) => ($data.edit = false)),
-                    replyInfo: $data.replyInfo,
-                    replyUser: $props.modelValue.username,
-                    replyFloor: $props.modelValue.floor,
+                    replyInfo:
+                      $data.replyInfo ||
+                      ($props.modelValue && $props.modelValue.username
+                        ? `@${$props.modelValue.username} `
+                        : ""),
+                    replyUser:
+                      ($props.modelValue &&
+                        ($props.modelValue.username ||
+                          ($props.modelValue.member &&
+                            $props.modelValue.member.username) ||
+                          $props.modelValue.author)) ||
+                      "",
+                    replyFloor:
+                      ($props.modelValue && $props.modelValue.floor) || "",
                   },
                   null,
                   8,
@@ -7432,9 +7478,12 @@
         expand: true,
         expandTopReply: true,
         expandWrong: false,
-        replyInfo: `@${this.modelValue.username} #${this.modelValue.floor} `,
+        replyInfo:
+          this.modelValue && this.modelValue.username
+            ? `@${this.modelValue.username} `
+            : "",
         cssStyle: null,
-        floor: this.modelValue.floor,
+        floor: this.modelValue ? this.modelValue.floor : "",
       };
     },
     watch: {
@@ -7821,9 +7870,23 @@
                                   _cache[6] ||
                                   (_cache[6] = ($event) =>
                                     ($data.edit = false)),
-                                replyInfo: $data.replyInfo,
-                                replyUser: $props.modelValue.username,
-                                replyFloor: $props.modelValue.floor,
+                                replyInfo:
+                                  $data.replyInfo ||
+                                  ($props.modelValue &&
+                                  $props.modelValue.username
+                                    ? `@${$props.modelValue.username} `
+                                    : ""),
+                                replyUser:
+                                  ($props.modelValue &&
+                                    ($props.modelValue.username ||
+                                      ($props.modelValue.member &&
+                                        $props.modelValue.member.username) ||
+                                      $props.modelValue.author)) ||
+                                  "",
+                                replyFloor:
+                                  ($props.modelValue &&
+                                    $props.modelValue.floor) ||
+                                  "",
                               },
                               null,
                               8,
