@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC style
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.1
+// @version      1.0.2
 // @description  V2EX Pro PC 端样式脚本：统一设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁背景与主题类注入。须先于「V2EX Pro - PC」主脚本启用。
 // @description:zh-CN  V2EX Pro PC 端样式脚本：统一设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁背景与主题类注入。须先于「V2EX Pro - PC」主脚本启用。
 // @author       git710
@@ -59,10 +59,10 @@ if (typeof GM_addStyle === "undefined") {
     aqua: "#f2f7fa",
   };
 
-  // 读取用户上次的设置；auto 或未设置时跟随系统
-  var currentMode = localStorage.getItem(STORAGE_KEY);
+  // 读取用户上次的设置；未设置时默认使用水色 (aqua)
+  var currentMode = localStorage.getItem(STORAGE_KEY) || "aqua";
   var effectiveMode = currentMode;
-  if (!currentMode || currentMode === "auto") {
+  if (currentMode === "auto") {
     effectiveMode =
       window.matchMedia &&
       window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -96,7 +96,7 @@ if (typeof GM_addStyle === "undefined") {
   };
 
   var getResolvedMode = function () {
-    var mode = localStorage.getItem(STORAGE_KEY) || "auto";
+    var mode = localStorage.getItem(STORAGE_KEY) || "aqua";
     if (mode === "auto") {
       mode =
         window.matchMedia &&
@@ -1256,6 +1256,7 @@ img[data-v-e7c0fbef] {
   border-radius: 2rem;
   font-size: 1.6rem;
   overflow: hidden;
+  overscroll-behavior: contain;
   color: var(--color-font-pure);
 }
 
@@ -1354,6 +1355,7 @@ img[data-v-e7c0fbef] {
   flex: 1;
   padding-right: 1rem;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .setting-modal .modal-root .body .modal-content .scroll .row[data-v-086214a4] {
@@ -3558,6 +3560,7 @@ a:hover {
   display: flex;
   justify-content: center;
   align-items: center;
+  overscroll-behavior: contain;
 }
 
 .modal .title {
@@ -4844,7 +4847,7 @@ html input[data-v-d39217d8]:focus {
     } catch (e) {
       saved = "";
     }
-    return THEME_MODES.indexOf(saved) > -1 ? saved : "auto";
+    return THEME_MODES.indexOf(saved) > -1 ? saved : "aqua";
   }
 
   function resolveMode(mode) {
@@ -4912,7 +4915,7 @@ html input[data-v-d39217d8]:focus {
   }
 
   function applyTheme(mode, persist) {
-    currentMode = THEME_MODES.indexOf(mode) > -1 ? mode : "auto";
+    currentMode = THEME_MODES.indexOf(mode) > -1 ? mode : "aqua";
     if (persist) {
       try {
         localStorage.setItem(STORAGE_KEY, currentMode);
@@ -4953,6 +4956,19 @@ html input[data-v-d39217d8]:focus {
       // ignore
     }
   }
+
+  // 供主脚本设置面板等直接调用的全局切换接口
+  window.v2pSetTheme = function (mode) {
+    applyTheme(mode, true);
+  };
+  window.v2pGetTheme = function () {
+    return getSavedMode();
+  };
+  window.addEventListener("v2p-change-theme", function (e) {
+    if (e && e.detail && e.detail.mode) {
+      applyTheme(e.detail.mode, true);
+    }
+  });
 
   function ensureToggleButton() {
     if (document.querySelector(TOGGLE_SELECTOR)) return;

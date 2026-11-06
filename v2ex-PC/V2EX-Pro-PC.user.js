@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.1
+// @version      1.0.2
 // @description  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @author       git710
@@ -3969,8 +3969,14 @@
       },
     },
     data() {
+      let savedTheme = "aqua";
+      try {
+        savedTheme =
+          localStorage.getItem("user_preferred_theme_mode") || "aqua";
+      } catch (e) {}
       return {
         tabIndex: 0,
+        currentTheme: savedTheme,
         config: functions.clone(this.modelValue),
         showNotice: false,
         exportLoading: false,
@@ -3981,6 +3987,24 @@
         index: 0,
         endTime: "0",
       };
+    },
+    created() {
+      try {
+        let saved = localStorage.getItem("user_preferred_theme_mode");
+        if (saved) this.currentTheme = saved;
+      } catch (e) {}
+      window.addEventListener("v2p-theme-change", (e) => {
+        if (e && e.detail && e.detail.mode) {
+          this.currentTheme = e.detail.mode;
+        }
+      });
+    },
+    beforeUnmount() {
+      if (this.show) {
+        document.documentElement.style.overflow = this._origHtmlOverflow || "";
+        document.body.style.overflow = this._origBodyOverflow || "unset";
+        document.body.style.paddingRight = this._origBodyPaddingRight || "";
+      }
     },
     computed: {
       DefaultVal() {
@@ -4035,16 +4059,166 @@
       },
       show(n2) {
         if (n2) {
+          try {
+            let saved = localStorage.getItem("user_preferred_theme_mode");
+            this.currentTheme = saved || "aqua";
+          } catch (e) {}
           if (this.config.version < DefaultVal.currentVersion) {
             $(".v2pro-new").remove();
           }
+          const scrollbarWidth =
+            window.innerWidth - document.documentElement.clientWidth;
+          this._origHtmlOverflow = document.documentElement.style.overflow;
+          this._origBodyOverflow = document.body.style.overflow;
+          this._origBodyPaddingRight = document.body.style.paddingRight;
+          if (scrollbarWidth > 0) {
+            document.body.style.paddingRight = `${scrollbarWidth}px`;
+          }
+          document.documentElement.style.overflow = "hidden";
           document.body.style.overflow = "hidden";
         } else {
-          document.body.style.overflow = "unset";
+          document.documentElement.style.overflow =
+            this._origHtmlOverflow || "";
+          document.body.style.overflow = this._origBodyOverflow || "unset";
+          document.body.style.paddingRight = this._origBodyPaddingRight || "";
         }
       },
     },
     methods: {
+      handleModalWheel(e) {
+        if (!e) return;
+        const modalEl = this.$el;
+        if (!modalEl || !modalEl.querySelector) return;
+        const modalRoot = modalEl.querySelector(".modal-root");
+        const target = e.target;
+        if (modalRoot && !modalRoot.contains(target)) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        const scrollEl = modalEl.querySelector(".modal-content .scroll");
+        if (!scrollEl) {
+          e.stopPropagation();
+          return;
+        }
+        const delta = e.deltaY;
+        const inScroll = scrollEl.contains(target);
+        if (inScroll) {
+          const isAtTop = scrollEl.scrollTop <= 0 && delta < 0;
+          const isAtBottom =
+            scrollEl.scrollTop + scrollEl.clientHeight >=
+              scrollEl.scrollHeight - 1 && delta > 0;
+          if (isAtTop || isAtBottom) {
+            e.preventDefault();
+          }
+          e.stopPropagation();
+        } else {
+          if (scrollEl.scrollHeight > scrollEl.clientHeight) {
+            scrollEl.scrollTop += delta;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      setTheme(mode) {
+        this.currentTheme = mode;
+        try {
+          localStorage.setItem("user_preferred_theme_mode", mode);
+        } catch (e) {}
+        if (typeof window.v2pSetTheme === "function") {
+          window.v2pSetTheme(mode);
+        } else {
+          try {
+            window.dispatchEvent(
+              new CustomEvent("v2p-change-theme", { detail: { mode } }),
+            );
+          } catch (e) {}
+        }
+      },
+      renderThemeSelector() {
+        return vue.createElementVNode("div", { class: "border" }, [
+          vue.createElementVNode("div", { class: "row" }, [
+            vue.createElementVNode(
+              "label",
+              { class: "item-title" },
+              "外观主题",
+            ),
+            vue.createElementVNode("div", { class: "wrapper" }, [
+              vue.createElementVNode(
+                "div",
+                { class: "radio-group2" },
+                [
+                  vue.createElementVNode(
+                    "div",
+                    {
+                      class: vue.normalizeClass([
+                        "radio",
+                        this.currentTheme === "light" && "active",
+                      ]),
+                      onClick: () => this.setTheme("light"),
+                    },
+                    "浅色",
+                    2,
+                  ),
+                  vue.createElementVNode(
+                    "div",
+                    {
+                      class: vue.normalizeClass([
+                        "radio",
+                        this.currentTheme === "dawn" && "active",
+                      ]),
+                      onClick: () => this.setTheme("dawn"),
+                    },
+                    "晨光",
+                    2,
+                  ),
+                  vue.createElementVNode(
+                    "div",
+                    {
+                      class: vue.normalizeClass([
+                        "radio",
+                        this.currentTheme === "aqua" && "active",
+                      ]),
+                      onClick: () => this.setTheme("aqua"),
+                    },
+                    "水色",
+                    2,
+                  ),
+                  vue.createElementVNode(
+                    "div",
+                    {
+                      class: vue.normalizeClass([
+                        "radio",
+                        this.currentTheme === "dark" && "active",
+                      ]),
+                      onClick: () => this.setTheme("dark"),
+                    },
+                    "深色",
+                    2,
+                  ),
+                  vue.createElementVNode(
+                    "div",
+                    {
+                      class: vue.normalizeClass([
+                        "radio",
+                        this.currentTheme === "auto" && "active",
+                      ]),
+                      onClick: () => this.setTheme("auto"),
+                    },
+                    "跟随系统",
+                    2,
+                  ),
+                ],
+              ),
+            ]),
+          ]),
+          vue.createElementVNode(
+            "div",
+            { class: "desc" },
+            "支持浅色、晨光、水色、深色四套主题与系统自动跟随；新安装默认使用水色，点击即时切换",
+          ),
+        ]);
+      },
       goPost() {
         fetch(DefaultVal.hotUrl + "new.txt")
           .then(async (r2) => {
@@ -4321,7 +4495,18 @@
         default: vue.withCtx(() => [
           $props.show
             ? (vue.openBlock(),
-              vue.createElementBlock("div", _hoisted_1$f, [
+              vue.createElementBlock(
+                "div",
+                {
+                  key: 0,
+                  class: "setting-modal modal",
+                  onWheel:
+                    _cache[100] ||
+                    (_cache[100] = (...args) =>
+                      $options.handleModalWheel &&
+                      $options.handleModalWheel(...args)),
+                },
+                [
                 vue.createElementVNode("div", {
                   class: "mask",
                   onClick:
@@ -4545,6 +4730,7 @@
                         $data.tabIndex === 0
                           ? (vue.openBlock(),
                             vue.createElementBlock("div", _hoisted_14$4, [
+                              $options.renderThemeSelector(),
                               vue.createElementVNode("div", _hoisted_15$3, [
                                 vue.createElementVNode("div", _hoisted_16$3, [
                                   _cache[46] ||
@@ -4761,6 +4947,7 @@
                         $data.tabIndex === 1
                           ? (vue.openBlock(),
                             vue.createElementBlock("div", _hoisted_27$1, [
+                              $options.renderThemeSelector(),
                               vue.createElementVNode("div", _hoisted_28$1, [
                                 _cache[53] ||
                                   (_cache[53] = vue.createElementVNode(
@@ -11275,8 +11462,10 @@
         () => props.modelValue,
         (n2) => {
           if (n2) {
+            document.documentElement.style.overflow = "hidden";
             document.body.style.overflow = "hidden";
           } else {
+            document.documentElement.style.overflow = "";
             document.body.style.overflow = "unset";
             $(".notify-wrap").scrollTop(0);
           }
@@ -11606,6 +11795,7 @@
       show(newVal) {
         if (this.pageType === PageType.Post) return;
         if (newVal) {
+          document.documentElement.style.overflow = "hidden";
           document.body.style.overflow = "hidden";
           if (!window.history.state) {
             window.history.pushState({}, 0, this.current.href);
@@ -11614,6 +11804,7 @@
             this.pageInfo.title = document.title = this.current.title ?? "V2EX";
           });
         } else {
+          document.documentElement.style.overflow = "";
           document.body.style.overflow = "unset";
           this.pageInfo.title = document.title = "V2EX";
           if (window.history.state) {
@@ -17016,8 +17207,17 @@
         default:
           window.stopMe = true;
           functions.cbChecker({ type: "syncData" });
-          console.error("未知页面");
           break;
+      }
+      // 兜底挂载：在 /settings 等非列表/非帖子页面，确保 Vue 根节点挂载入 DOM，使脚本设置等弹窗能正常弹出
+      if (!$section.parentNode) {
+        let mountPoint =
+          document.querySelector("#Main") ||
+          document.querySelector("#Wrapper") ||
+          document.body;
+        if (mountPoint) {
+          mountPoint.appendChild($section);
+        }
       }
       initMemberTags();
       initSidebarEnhancements();
@@ -17105,6 +17305,15 @@
   if (!isMobile) {
     // 样式由同仓库的 V2EX-Pro-PC-style.user.js 在 document-start 注入，此处不再经 @resource 加载
     run();
+    if (!$section.parentNode) {
+      let mountPoint =
+        document.querySelector("#Main") ||
+        document.querySelector("#Wrapper") ||
+        document.body;
+      if (mountPoint) {
+        mountPoint.appendChild($section);
+      }
+    }
     let vueApp = vue.createApp(App);
     vueApp.config.unwrapInjectedRef = true;
     vueApp.mount($section);

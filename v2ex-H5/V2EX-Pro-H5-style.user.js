@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - H5 style
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.1
+// @version      1.0.2
 // @description  V2EX Pro 移动端样式脚本：设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁注入与响应式布局。须与「V2EX Pro - H5」主脚本一同启用。
 // @description:zh-CN  V2EX Pro 移动端样式脚本：设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁注入与响应式布局。须与「V2EX Pro - H5」主脚本一同启用。
 // @author       git710
@@ -75,8 +75,8 @@ if (typeof GM_addStyle === "undefined") {
     }
   }
 
-  // 2. 读取用户上次的设置
-  let currentMode = localStorage.getItem(STORAGE_KEY);
+  // 2. 读取用户上次的设置；未设置时默认使用水色 (aqua)
+  let currentMode = localStorage.getItem(STORAGE_KEY) || "aqua";
 
   // [Fast Path] 1. 立即注入主题类 & 关键 CSS (背景色 + 隐藏 body)
   // 统一各主题背景色
@@ -88,7 +88,7 @@ if (typeof GM_addStyle === "undefined") {
   };
 
   let effectiveMode = currentMode;
-  if (currentMode === "auto" || !currentMode) {
+  if (currentMode === "auto") {
     effectiveMode =
       window.matchMedia &&
       window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -5267,11 +5267,8 @@ a:focus-visible, button:focus-visible, input:focus-visible,
       return raw;
     }
 
-    // 本地没有记录时，根据站点原生 SITE_NIGHT 决定初始模式：
-    // SITE_NIGHT = 1 → 我们默认用 v2p-theme-dark-default
-    // SITE_NIGHT = 0 → 默认用 v2p-theme-light-default
-    const native = detectNativeNight();
-    currentMode = native === 1 ? "dark" : "light";
+    // 本地没有记录时，默认使用水色 (aqua)
+    currentMode = "aqua";
     try {
       localStorage.setItem(STORAGE_KEY, currentMode);
     } catch (e) {}
