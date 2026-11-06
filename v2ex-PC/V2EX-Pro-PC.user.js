@@ -6601,107 +6601,175 @@
           );
         }
         let url2 = `${location.origin}/t/${post.value.id}`;
-        $.post(url2, { content: submit_content, once: post.value.once })
-          .then(
-            // $.post(url, {content: submit_content, once: 123}).then(
-            (res) => {
-              loading.value = false;
-              // V2EX 回帖接口现已返回 JSON（如 {"reply_id":"","success":true,"url":"/t/xxx?p=x"}），
-              // jQuery 会将其解析为对象，直接走字符串匹配会抛 TypeError 并被 .catch 静默吞掉，
-              // 导致页面无任何反应。这里先兼容 JSON 返回，再回退到旧版 HTML 处理。
-              let resData = res;
-              if (typeof res === "string") {
-                let trimmed = res.trim();
-                if (trimmed.startsWith("{")) {
-                  try {
-                    resData = JSON.parse(trimmed);
-                  } catch (e2) {
-                    resData = res;
+        function extractOnceFromHtml(html) {
+          if (typeof html !== "string") return null;
+          let m = html.match(/var once = "([\d]+)";/);
+          if (m && m[1]) return Number(m[1]);
+          let m2 =
+            html.match(/name="once"\s+value="([\d]+)"/) ||
+            html.match(/value="([\d]+)"\s+name="once"/);
+          if (m2 && m2[1]) return Number(m2[1]);
+          return null;
+        }
+        async function doSubmit(currentOnce, isRetry = false) {
+          let postOnce = currentOnce || post.value.once;
+          if (!postOnce) {
+            postOnce = await window.fetchOnce();
+            if (postOnce) post.value.once = postOnce;
+          }
+          $.post(url2, { content: submit_content, once: postOnce })
+            .then(
+              async (res) => {
+                // V2EX 回帖接口现已返回 JSON（如 {"reply_id":"","success":true,"url":"/t/xxx?p=x"}），
+                // jQuery 会将其解析为对象，直接走字符串匹配会抛 TypeError 并被 .catch 静默吞掉，
+                // 导致页面无任何反应。这里先兼容 JSON 返回，再回退到旧版 HTML 处理。
+                let resData = res;
+                if (typeof res === "string") {
+                  let trimmed = res.trim();
+                  if (trimmed.startsWith("{")) {
+                    try {
+                      resData = JSON.parse(trimmed);
+                    } catch (e2) {
+                      resData = res;
+                    }
                   }
                 }
-              }
-              if (resData && typeof resData === "object") {
-                if (resData.success) {
-                  content.value = replyInfo;
-                  emits("close");
-                  eventBus.emit(CMD.REFRESH_ONCE, resData.once);
-                  eventBus.emit(CMD.SHOW_MSG, {
-                    type: "success",
-                    text: "回复成功",
+                if (resData && typeof resData === "object") {
+                  loading.value = false;
+                  if (resData.success) {
+                    content.value = replyInfo;
+                    emits("close");
+                    eventBus.emit(CMD.REFRESH_ONCE, resData.once);
+                    eventBus.emit(CMD.SHOW_MSG, {
+                      type: "success",
+                      text: "回复成功",
+                    });
+                    eventBus.emit(CMD.ADD_REPLY, item);
+                  } else {
+                    if (resData.once) {
+                      eventBus.emit(CMD.REFRESH_ONCE, resData.once);
+                    }
+                    // 失败时 message 一般形如“你上一条回复的内容和这条相同”等
+                    eventBus.emit(CMD.SHOW_MSG, {
+                      type: "error",
+                      text:
+                        resData.message ||
+                        resData.error ||
+                        "回复失败，请稍后重试",
+                    });
+                  }
+                  return;
+                }
+                let r2 =
+                  typeof res === "string"
+                    ? res.search("你上一条回复的内容和这条相同")
+                    : -1;
+                if (r2 > -1) {
+                  loading.value = false;
+                  return eventBus.emit(CMD.SHOW_MSG, {
+                    type: "error",
+                    text: "你上一条回复的内容和这条相同",
                   });
-                  eventBus.emit(CMD.ADD_REPLY, item);
-                } else {
-                  // 失败时 message 一般形如“你上一条回复的内容和这条相同”等
+                }
+                r2 =
+                  typeof res === "string"
+                    ? res.search(
+                        "请不要在每一个回复中都包括外链，这看起来像是在 spamming",
+                      )
+                    : -1;
+                if (r2 > -1) {
+                  loading.value = false;
+                  return eventBus.emit(CMD.SHOW_MSG, {
+                    type: "error",
+                    text: "请不要在每一个回复中都包括外链，这看起来像是在 spamming",
+                  });
+                }
+                let r22 =
+                  typeof res === "string" ? res.search("创建新回复") : -1;
+                if (r22 > -1) {
+                  eventBus.emit(CMD.REFRESH_ONCE, res);
+                  // 服务端返回表单 HTML（“创建新回复”），通常代表 once 失效或 CSRF 拦截。
+                  // 尝试静默提取返回内容中的最新 once 自动重试 1 次。
+                  if (!isRetry) {
+                    let newOnce = extractOnceFromHtml(res);
+                    if (!newOnce) {
+                      newOnce = await window.fetchOnce();
+                    }
+                    if (newOnce) {
+                      console.log(
+                        "[V2EX Pro] 检测到 once 失效，已获取最新 once 并静默重试回复:",
+                        newOnce,
+                      );
+                      post.value.once = newOnce;
+                      return doSubmit(newOnce, true);
+                    }
+                  }
+                  loading.value = false;
                   eventBus.emit(CMD.SHOW_MSG, {
                     type: "error",
-                    text:
-                      resData.message ||
-                      resData.error ||
-                      "回复失败，请稍后重试",
+                    text: "回复出现了问题，请使用原版进行回复",
                   });
+                  let clientWidth = window.document.body.clientWidth;
+                  let windowWidth = 1200;
+                  let left = clientWidth / 2 - windowWidth / 2;
+                  let newWin = window.open(
+                    "",
+                    "_blank",
+                    `width=${windowWidth},height=600,left=${left},top=100`,
+                  );
+                  if (newWin) {
+                    newWin.document.write(res);
+                    let loop = setInterval(function () {
+                      if (newWin.closed) {
+                        clearInterval(loop);
+                        eventBus.emit(CMD.REFRESH_POST);
+                      }
+                    }, 1e3);
+                  } else {
+                    eventBus.emit(CMD.SHOW_MSG, {
+                      type: "warning",
+                      text: "窗口被浏览器拦截，请允许弹出窗口后重试",
+                    });
+                  }
+                  return;
                 }
-                return;
-              }
-              let r2 = res.search("你上一条回复的内容和这条相同");
-              if (r2 > -1)
-                return eventBus.emit(CMD.SHOW_MSG, {
-                  type: "error",
-                  text: "你上一条回复的内容和这条相同",
-                });
-              r2 = res.search(
-                "请不要在每一个回复中都包括外链，这看起来像是在 spamming",
-              );
-              if (r2 > -1)
-                return eventBus.emit(CMD.SHOW_MSG, {
-                  type: "error",
-                  text: "请不要在每一个回复中都包括外链，这看起来像是在 spamming",
-                });
-              let r22 = res.search("创建新回复");
-              if (r22 > -1) {
+                loading.value = false;
+                content.value = replyInfo;
+                emits("close");
                 eventBus.emit(CMD.REFRESH_ONCE, res);
                 eventBus.emit(CMD.SHOW_MSG, {
-                  type: "error",
-                  text: "回复出现了问题，请使用原版进行回复",
+                  type: "success",
+                  text: "回复成功",
                 });
-                let clientWidth = window.document.body.clientWidth;
-                let windowWidth = 1200;
-                let left = clientWidth / 2 - windowWidth / 2;
-                let newWin = window.open(
-                  "",
-                  "_blank",
-                  `width=${windowWidth},height=600,left=${left},top=100`,
-                );
-                if (newWin) {
-                  newWin.document.write(res);
-                  let loop = setInterval(function () {
-                    if (newWin.closed) {
-                      clearInterval(loop);
-                      eventBus.emit(CMD.REFRESH_POST);
+                eventBus.emit(CMD.ADD_REPLY, item);
+              },
+              async (err) => {
+                // 网络异常或 403 拦截时，尝试刷新 once 并静默重试 1 次
+                if (!isRetry) {
+                  try {
+                    let freshOnce = await window.fetchOnce();
+                    if (freshOnce) {
+                      console.log(
+                        "[V2EX Pro] 请求异常，尝试通过 fetchOnce 获取最新 once 重试:",
+                        freshOnce,
+                      );
+                      post.value.once = freshOnce;
+                      return doSubmit(freshOnce, true);
                     }
-                  }, 1e3);
-                } else {
-                  eventBus.emit(CMD.SHOW_MSG, {
-                    type: "warning",
-                    text: "窗口被浏览器拦截，请允许弹出窗口后重试",
-                  });
+                  } catch (e2) {}
                 }
-                return;
-              }
-              content.value = replyInfo;
-              emits("close");
-              eventBus.emit(CMD.REFRESH_ONCE, res);
-              eventBus.emit(CMD.SHOW_MSG, {
-                type: "success",
-                text: "回复成功",
-              });
-              eventBus.emit(CMD.ADD_REPLY, item);
-            },
-            (err) => {
+                loading.value = false;
+                eventBus.emit(CMD.SHOW_MSG, {
+                  type: "error",
+                  text: "回复失败",
+                });
+              },
+            )
+            .catch(() => {
               loading.value = false;
-              eventBus.emit(CMD.SHOW_MSG, { type: "error", text: "回复失败" });
-            },
-          )
-          .catch(() => {});
+            });
+        }
+        doSubmit(post.value.once, false);
       }
       function getEmojiSrc(url2) {
         return window.config.replaceImgur ? DefaultVal.imgurProxy + url2 : url2;
