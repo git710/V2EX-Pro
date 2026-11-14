@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.3
+// @version      1.0.4
 // @description  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @author       git710
@@ -1195,6 +1195,8 @@
         newTabOpenActive: false,
         openExternalLinkInNewTab: true,
         //外链新标签页打开
+        privacyMode: false,
+        //隐私模式（防窥）
         base64: true,
         //base功能
         sov2ex: false,
@@ -4882,6 +4884,33 @@
                                   "div",
                                   { class: "desc" },
                                   " 网页上的外部链接（非本站与镜像站）默认在新标签页中打开 ",
+                                ),
+                              ]),
+                              vue.createElementVNode("div", _hoisted_22$1, [
+                                vue.createElementVNode("div", _hoisted_23$1, [
+                                  vue.createElementVNode(
+                                    "label",
+                                    { class: "item-title" },
+                                    "隐私模式（防窥）",
+                                  ),
+                                  vue.createElementVNode("div", _hoisted_24$1, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue: $data.config.privacyMode,
+                                        "onUpdate:modelValue": ($event) =>
+                                          ($data.config.privacyMode = $event),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode(
+                                  "div",
+                                  { class: "desc" },
+                                  " 模糊右侧栏个人卡片与顶部用户名等敏感信息，鼠标悬停时自动清晰展示 ",
                                 ),
                               ]),
                               vue.createElementVNode("div", _hoisted_22$1, [
@@ -11761,6 +11790,9 @@
       tags(newVal) {
         window.user.tags = newVal;
       },
+      "config.privacyMode"(newVal) {
+        applyPrivacyMode(Boolean(newVal));
+      },
       "config.viewType"(newVal) {
         if (!newVal) return;
         if (newVal === "card") {
@@ -14908,6 +14940,26 @@
       .v2p-image-viewer-nav:active {
         transform: translateY(-50%) scale(0.95);
       }
+
+      /* ---------- 8. 隐私模式（工作防窥） ---------- */
+      html.v2p-privacy-mode #Rightbar .box:has(a[href^="/member/"]),
+      html.v2p-privacy-mode #Rightbar .box.v2p-privacy-target,
+      html.v2p-privacy-mode #Wrapper .content #Rightbar .box.v2p-privacy-target,
+      html.v2p-privacy-mode #Top .tools a[href^="/member/"],
+      html.v2p-privacy-mode #Top .tools a[href="/notifications"],
+      html.v2p-privacy-mode #Top .tools a[href="/balance"] {
+        filter: blur(8px);
+        transition: filter 0.25s ease;
+        user-select: none;
+      }
+      html.v2p-privacy-mode #Rightbar .box:has(a[href^="/member/"]):hover,
+      html.v2p-privacy-mode #Rightbar .box.v2p-privacy-target:hover,
+      html.v2p-privacy-mode #Wrapper .content #Rightbar .box.v2p-privacy-target:hover,
+      html.v2p-privacy-mode #Top .tools a[href^="/member/"]:hover,
+      html.v2p-privacy-mode #Top .tools a[href="/notifications"]:hover,
+      html.v2p-privacy-mode #Top .tools a[href="/balance"]:hover {
+        filter: blur(0) !important;
+      }
       `;
       _GM_addStyle(style2);
 
@@ -17199,6 +17251,23 @@
       window.addEventListener("resize", hideMemberCard);
     }
 
+    function applyPrivacyMode(enable) {
+      if (enable) {
+        document.documentElement.classList.add("v2p-privacy-mode");
+        const userCard =
+          document.querySelector("#Rightbar .box .avatar")?.closest(".box") ||
+          document.querySelector("#Rightbar > .box");
+        if (userCard) {
+          userCard.classList.add("v2p-privacy-target");
+        }
+      } else {
+        document.documentElement.classList.remove("v2p-privacy-mode");
+        document.querySelectorAll(".v2p-privacy-target").forEach((el) => {
+          el.classList.remove("v2p-privacy-target");
+        });
+      }
+    }
+
     function initImageViewerEnhancement() {
       const root = document.documentElement;
       if (root.getAttribute("data-v2p-image-viewer-init") === "1") return;
@@ -17573,6 +17642,7 @@
       window.pageData = pageData;
       window.targetUserName = username;
       initStyle();
+      applyPrivacyMode(Boolean(window.config?.privacyMode));
       // 列表页启用意图预取（首页/节点），只读加速站内详情秒开
       if (
         window.pageType === PageType.Home ||
@@ -17769,6 +17839,7 @@
       initReplyEnhancements();
       initMemberHoverCards();
       initImageViewerEnhancement();
+      applyPrivacyMode(Boolean(window.config?.privacyMode));
       if (window.isLogin) {
         initNoteData();
         try {

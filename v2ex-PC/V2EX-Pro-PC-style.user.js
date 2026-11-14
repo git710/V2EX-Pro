@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC style
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.3
+// @version      1.0.4
 // @description  V2EX Pro PC 端样式脚本：统一设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁背景与主题类注入。须先于「V2EX Pro - PC」主脚本启用。
 // @description:zh-CN  V2EX Pro PC 端样式脚本：统一设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁背景与主题类注入。须先于「V2EX Pro - PC」主脚本启用。
 // @author       git710
@@ -85,6 +85,14 @@ if (typeof GM_addStyle === "undefined") {
   }
 
   docEl.style.backgroundColor = initBg;
+
+  // 隐私模式预置类（防闪烁）：若配置开启，在 document-start 先行打标
+  try {
+    var rawCfg = localStorage.getItem("v2ex-config");
+    if (rawCfg && rawCfg.includes('"privacyMode":true')) {
+      docEl.classList.add("v2p-privacy-mode");
+    }
+  } catch (e) {}
 
   // --- theme-color 同步（自 v2ex-H5 移植，浏览器标题栏颜色随主题） ---
   var getModeFromClass = function () {
@@ -5006,6 +5014,27 @@ html input[data-v-d39217d8]:focus {
 
 .v2p-image-viewer-nav:active {
   transform: translateY(-50%) scale(0.95);
+}
+
+/* ---------- 隐私模式（工作防窥） ---------- */
+html.v2p-privacy-mode #Rightbar .box:has(a[href^="/member/"]),
+html.v2p-privacy-mode #Rightbar .box.v2p-privacy-target,
+html.v2p-privacy-mode #Wrapper .content #Rightbar .box.v2p-privacy-target,
+html.v2p-privacy-mode #Top .tools a[href^="/member/"],
+html.v2p-privacy-mode #Top .tools a[href="/notifications"],
+html.v2p-privacy-mode #Top .tools a[href="/balance"] {
+  filter: blur(8px);
+  transition: filter 0.25s ease;
+  user-select: none;
+}
+
+html.v2p-privacy-mode #Rightbar .box:has(a[href^="/member/"]):hover,
+html.v2p-privacy-mode #Rightbar .box.v2p-privacy-target:hover,
+html.v2p-privacy-mode #Wrapper .content #Rightbar .box.v2p-privacy-target:hover,
+html.v2p-privacy-mode #Top .tools a[href^="/member/"]:hover,
+html.v2p-privacy-mode #Top .tools a[href="/notifications"]:hover,
+html.v2p-privacy-mode #Top .tools a[href="/balance"]:hover {
+  filter: blur(0) !important;
 }`;
   GM_addStyle(V2Pro_CSS);
 })();
