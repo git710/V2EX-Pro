@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - H5
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.2
+// @version      1.0.3
 // @description  V2EX 网页增强脚本（移动端 H5）：四套主题、回复定位与预览、楼层直达、用户标签、高赞回复、楼中楼优化、表情回复、整页 Base64 解析、节点导航自定义、WebDAV 配置同步、自动签到。须与「V2EX Pro - H5 style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（移动端 H5）：四套主题、回复定位与预览、楼层直达、用户标签、高赞回复、楼中楼优化、表情回复、整页 Base64 解析、节点导航自定义、WebDAV 配置同步、自动签到。须与「V2EX Pro - H5 style」样式脚本一同启用。
 // @author       git710
@@ -3373,7 +3373,11 @@ function updateMemberTag() {
   });
   updateTopReplyMemberTags();
   loadIcons();
-  applyExternalLinkTargets($box);
+  applyExternalLinkTargets(
+    typeof $commentBox !== "undefined" && $commentBox?.length
+      ? $commentBox
+      : undefined,
+  );
 }
 // 高赞回复卡片是用户名副本，单独补一次标签（不挂打标签按钮）
 function updateTopReplyMemberTags() {
@@ -9448,5 +9452,355 @@ runAfterLoaded(() => {
     document.addEventListener("DOMContentLoaded", initSettingsPage);
   } else {
     initSettingsPage();
+  }
+})();
+
+// ==========================================================================
+// V2EX Pro - 移动端图片查看器（H5 移植增强）
+// ==========================================================================
+(function () {
+  "use strict";
+
+  function initH5ImageViewer() {
+    const root = document.documentElement;
+    if (root.getAttribute("data-v2p-h5-image-viewer-init") === "1") return;
+    root.setAttribute("data-v2p-h5-image-viewer-init", "1");
+
+    const viewerEl = document.createElement("div");
+    viewerEl.className = "v2p-image-viewer v2p-mobile-viewer";
+    viewerEl.innerHTML = `
+      <div class="v2p-image-viewer-mask"></div>
+      <div class="v2p-image-viewer-toolbar">
+        <div class="v2p-image-viewer-counter"></div>
+        <div class="v2p-image-viewer-actions">
+          <button type="button" class="v2p-image-viewer-btn v2p-image-viewer-rotate" title="向右旋转 90°">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </button>
+          <a class="v2p-image-viewer-btn v2p-image-viewer-origin" target="_blank" rel="noopener noreferrer" title="查看原图">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </a>
+          <button type="button" class="v2p-image-viewer-btn v2p-image-viewer-close" title="关闭">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+      <div class="v2p-image-viewer-stage">
+        <img class="v2p-image-viewer-img" src="" referrerpolicy="no-referrer" alt="预览图" />
+        <div class="v2p-image-viewer-loading">
+          <div class="v2p-image-viewer-spinner"></div>
+        </div>
+      </div>
+      <div class="v2p-image-viewer-footer-hint">左右滑动切图 · 下滑退出</div>
+    `;
+    document.body.appendChild(viewerEl);
+
+    const maskEl = viewerEl.querySelector(".v2p-image-viewer-mask");
+    const stageEl = viewerEl.querySelector(".v2p-image-viewer-stage");
+    const imgEl = viewerEl.querySelector(".v2p-image-viewer-img");
+    const loadingEl = viewerEl.querySelector(".v2p-image-viewer-loading");
+    const counterEl = viewerEl.querySelector(".v2p-image-viewer-counter");
+    const rotateBtn = viewerEl.querySelector(".v2p-image-viewer-rotate");
+    const originBtn = viewerEl.querySelector(".v2p-image-viewer-origin");
+    const closeBtn = viewerEl.querySelector(".v2p-image-viewer-close");
+    const footerHint = viewerEl.querySelector(".v2p-image-viewer-footer-hint");
+
+    let isOpen = false;
+    let currentScale = 1;
+    let currentRotate = 0;
+    let translateX = 0;
+    let translateY = 0;
+    let previousBodyOverflow = "";
+
+    let galleryList = [];
+    let galleryIndex = 0;
+
+    // 手势状态
+    let initialPinchDistance = 0;
+    let initialScale = 1;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let initialTranslateX = 0;
+    let initialTranslateY = 0;
+    let lastTapTime = 0;
+
+    function updateTransform() {
+      imgEl.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${currentScale}) rotate(${currentRotate}deg)`;
+    }
+
+    function resetState() {
+      currentScale = 1;
+      currentRotate = 0;
+      translateX = 0;
+      translateY = 0;
+      imgEl.classList.remove("touching");
+      updateTransform();
+    }
+
+    function setScale(newScale) {
+      const clamped = Math.min(Math.max(newScale, 0.5), 5);
+      currentScale = Math.round(clamped * 100) / 100;
+      updateTransform();
+    }
+
+    function rotateViewer() {
+      currentRotate = (currentRotate + 90) % 360;
+      updateTransform();
+    }
+
+    function updateGalleryUI() {
+      const count = galleryList.length;
+      if (count > 1) {
+        counterEl.textContent = `${galleryIndex + 1} / ${count}`;
+        footerHint.style.display = "block";
+      } else {
+        counterEl.textContent = "";
+        footerHint.style.display = "none";
+      }
+    }
+
+    function switchImage(targetIndex) {
+      if (!galleryList.length) return;
+      const count = galleryList.length;
+      galleryIndex = ((targetIndex % count) + count) % count;
+      const item = galleryList[galleryIndex];
+      if (!item) return;
+
+      resetState();
+      updateGalleryUI();
+
+      const targetUrl = item.originHref || item.src;
+      originBtn.href = targetUrl;
+
+      loadingEl.classList.add("show");
+      imgEl.style.opacity = "0";
+      imgEl.src = item.src;
+
+      const testImg = document.createElement("img");
+      testImg.referrerPolicy = "no-referrer";
+      testImg.onload = () => {
+        if (!isOpen) return;
+        loadingEl.classList.remove("show");
+        imgEl.style.opacity = "1";
+      };
+      testImg.onerror = () => {
+        if (!isOpen) return;
+        loadingEl.classList.remove("show");
+        imgEl.style.opacity = "1";
+      };
+      testImg.src = item.src;
+    }
+
+    const IMAGE_PARENT_SELECTORS = [
+      ".topic_content",
+      ".reply_content",
+      ".markdown_body",
+      ".embedded_image",
+      "#Main .cell",
+    ].join(",");
+
+    function isEligibleImage(img) {
+      if (!img || img.tagName !== "IMG") return false;
+      if (img.classList.contains("avatar") || (img.closest && img.closest(".avatar"))) return false;
+      if (img.closest && img.closest(".emoticon-pack, .emoji, [data-emoji]")) return false;
+      if (!img.closest || !img.closest(IMAGE_PARENT_SELECTORS)) return false;
+      if (img.naturalWidth > 0 && img.naturalWidth <= 32 && img.naturalHeight > 0 && img.naturalHeight <= 32) {
+        return false;
+      }
+      return true;
+    }
+
+    function resolveOriginalSrc(img) {
+      const parentA = img.closest ? img.closest("a") : null;
+      if (parentA && parentA.href) {
+        const href = parentA.href.trim();
+        if (/\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(href) || href.includes("imgur.com")) {
+          return { src: href, originHref: href };
+        }
+      }
+      const originUrl = img.getAttribute("originUrl") || (img.dataset ? img.dataset.origin : "");
+      const src = originUrl || img.currentSrc || img.src;
+      return { src, originHref: parentA ? parentA.href : src };
+    }
+
+    function collectGallery(clickedImg) {
+      const scope = document.querySelector("#Main") || document;
+      const imgs = Array.from(scope.querySelectorAll(IMAGE_PARENT_SELECTORS + " img")).filter(isEligibleImage);
+      const uniqueImgs = [];
+      const seen = new Set();
+      imgs.forEach((img) => {
+        if (!seen.has(img)) {
+          seen.add(img);
+          const resolved = resolveOriginalSrc(img);
+          if (resolved.src) {
+            uniqueImgs.push({ img, src: resolved.src, originHref: resolved.originHref });
+          }
+        }
+      });
+
+      let idx = uniqueImgs.findIndex((item) => item.img === clickedImg);
+      if (idx === -1) {
+        const fallback = resolveOriginalSrc(clickedImg);
+        uniqueImgs.unshift({ img: clickedImg, src: fallback.src, originHref: fallback.originHref });
+        idx = 0;
+      }
+      return { list: uniqueImgs, index: idx };
+    }
+
+    function openViewer(clickedImg) {
+      if (!clickedImg) return;
+      isOpen = true;
+
+      const gallery = collectGallery(clickedImg);
+      galleryList = gallery.list;
+      galleryIndex = gallery.index;
+
+      switchImage(galleryIndex);
+
+      previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      viewerEl.classList.add("show");
+    }
+
+    function closeViewer() {
+      if (!isOpen) return;
+      isOpen = false;
+      viewerEl.classList.remove("show");
+      document.body.style.overflow = previousBodyOverflow;
+      setTimeout(() => {
+        if (!isOpen) {
+          imgEl.src = "";
+          galleryList = [];
+          galleryIndex = 0;
+          resetState();
+        }
+      }, 250);
+    }
+
+    rotateBtn.addEventListener("click", rotateViewer);
+    closeBtn.addEventListener("click", closeViewer);
+    maskEl.addEventListener("click", closeViewer);
+
+    stageEl.addEventListener(
+      "touchstart",
+      (e) => {
+        if (!isOpen) return;
+        if (e.touches.length === 2) {
+          initialPinchDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY,
+          );
+          initialScale = currentScale;
+          imgEl.classList.add("touching");
+        } else if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          initialTranslateX = translateX;
+          initialTranslateY = translateY;
+          imgEl.classList.add("touching");
+        }
+      },
+      { passive: false },
+    );
+
+    stageEl.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!isOpen) return;
+        e.preventDefault();
+
+        if (e.touches.length === 2 && initialPinchDistance > 0) {
+          const currentDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY,
+          );
+          const ratio = currentDist / initialPinchDistance;
+          setScale(initialScale * ratio);
+        } else if (e.touches.length === 1) {
+          const deltaX = e.touches[0].clientX - touchStartX;
+          const deltaY = e.touches[0].clientY - touchStartY;
+
+          if (currentScale > 1.05) {
+            translateX = initialTranslateX + deltaX;
+            translateY = initialTranslateY + deltaY;
+            updateTransform();
+          } else {
+            translateX = deltaX * 0.5;
+            translateY = deltaY > 0 ? deltaY * 0.7 : deltaY * 0.2;
+            updateTransform();
+          }
+        }
+      },
+      { passive: false },
+    );
+
+    stageEl.addEventListener("touchend", (e) => {
+      if (!isOpen) return;
+      imgEl.classList.remove("touching");
+
+      if (e.touches.length === 0) {
+        const changedTouch = e.changedTouches[0];
+        if (changedTouch) {
+          const deltaX = changedTouch.clientX - touchStartX;
+          const deltaY = changedTouch.clientY - touchStartY;
+          const absX = Math.abs(deltaX);
+          const absY = Math.abs(deltaY);
+
+          const now = Date.now();
+          if (now - lastTapTime < 300 && absX < 15 && absY < 15) {
+            lastTapTime = 0;
+            if (currentScale > 1.05) {
+              resetState();
+            } else {
+              setScale(2);
+            }
+            return;
+          }
+          lastTapTime = now;
+
+          if (currentScale <= 1.05) {
+            if (deltaY > 80 && absY > absX * 1.2) {
+              closeViewer();
+              return;
+            }
+
+            if (absX > 50 && absX > absY * 1.2) {
+              if (deltaX > 0) {
+                switchImage(galleryIndex - 1);
+              } else {
+                switchImage(galleryIndex + 1);
+              }
+              return;
+            }
+
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+          }
+        }
+      }
+    });
+
+    document.addEventListener(
+      "click",
+      function (e) {
+        const target = e.target;
+        if (!target) return;
+        const img = target.tagName === "IMG" ? target : (target.closest ? target.closest("img") : null);
+        if (!isEligibleImage(img)) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        openViewer(img);
+      },
+      true,
+    );
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initH5ImageViewer);
+  } else {
+    initH5ImageViewer();
   }
 })();

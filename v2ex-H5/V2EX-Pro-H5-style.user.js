@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - H5 style
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.2
+// @version      1.0.3
 // @description  V2EX Pro 移动端样式脚本：设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁注入与响应式布局。须与「V2EX Pro - H5」主脚本一同启用。
 // @description:zh-CN  V2EX Pro 移动端样式脚本：设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁注入与响应式布局。须与「V2EX Pro - H5」主脚本一同启用。
 // @author       git710
@@ -5055,6 +5055,163 @@ a:focus-visible, button:focus-visible, input:focus-visible,
         animation-duration: 150ms !important;
         transition-duration: 150ms !important;
     }
+}
+
+/* ---------- 移动端图片查看器 ---------- */
+.v2p-image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.v2p-image-viewer.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.v2p-image-viewer-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.v2p-image-viewer-toolbar {
+  position: absolute;
+  top: env(safe-area-inset-top, 16px);
+  left: 12px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(30, 30, 30, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--v2p-radius-md, 10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.v2p-image-viewer-counter {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f1f2f4;
+  font-family: var(--v2p-font-mono, monospace);
+}
+
+.v2p-image-viewer-counter:empty {
+  display: none;
+}
+
+.v2p-image-viewer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.v2p-image-viewer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: #f1f2f4;
+  background: transparent;
+  border: none;
+  border-radius: var(--v2p-radius-sm, 6px);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.v2p-image-viewer-btn:active {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0.92);
+}
+
+.v2p-image-viewer-stage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.v2p-image-viewer-img {
+  max-width: 95vw;
+  max-height: 85vh;
+  object-fit: contain;
+  pointer-events: auto;
+  transform-origin: center center;
+  transition: transform 0.08s ease-out;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  border-radius: var(--v2p-radius-sm, 4px);
+  -webkit-touch-callout: none;
+}
+
+.v2p-image-viewer-img.touching {
+  transition: none !important;
+}
+
+.v2p-image-viewer-loading {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.v2p-image-viewer-loading.show {
+  opacity: 1;
+}
+
+.v2p-image-viewer-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: v2p-viewer-spin 0.8s linear infinite;
+}
+
+@keyframes v2p-viewer-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.v2p-image-viewer-footer-hint {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 16px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  letter-spacing: 0.5px;
 }
 `;
 

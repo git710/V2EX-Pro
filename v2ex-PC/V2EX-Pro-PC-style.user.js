@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC style
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.2
+// @version      1.0.3
 // @description  V2EX Pro PC 端样式脚本：统一设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁背景与主题类注入。须先于「V2EX Pro - PC」主脚本启用。
 // @description:zh-CN  V2EX Pro PC 端样式脚本：统一设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁背景与主题类注入。须先于「V2EX Pro - PC」主脚本启用。
 // @author       git710
@@ -4794,6 +4794,218 @@ html input[data-v-d39217d8]:focus {
 }
 .v2p-member-card-status:empty {
   display: none;
+}
+
+/* ---------- 图片查看器（PC 端模态弹窗） ---------- */
+.v2p-image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.v2p-image-viewer.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.v2p-image-viewer-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(4px);
+  cursor: zoom-out;
+}
+
+.v2p-image-viewer-stage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.v2p-image-viewer-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  pointer-events: auto;
+  cursor: grab;
+  transform-origin: center center;
+  transition: transform 0.08s ease-out;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36);
+  border-radius: var(--v2p-radius-sm, 4px);
+}
+
+.v2p-image-viewer-img.dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+.v2p-image-viewer-loading {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.v2p-image-viewer-loading.show {
+  opacity: 1;
+}
+
+.v2p-image-viewer-spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: v2p-viewer-spin 0.8s linear infinite;
+}
+
+@keyframes v2p-viewer-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.v2p-image-viewer-toolbar {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(30, 30, 30, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--v2p-radius-md, 8px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.v2p-image-viewer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: #f1f2f4;
+  background: transparent;
+  border: none;
+  border-radius: var(--v2p-radius-sm, 4px);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, transform 0.1s;
+}
+
+.v2p-image-viewer-btn:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.v2p-image-viewer-btn:active {
+  transform: scale(0.95);
+}
+
+.v2p-image-viewer-btn.v2p-image-viewer-close:hover {
+  background-color: rgba(235, 87, 87, 0.85);
+  color: #ffffff;
+}
+
+.v2p-image-viewer-scale-text {
+  min-width: 48px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e2e4e8;
+  font-family: var(--v2-font-mono, monospace);
+  padding: 0 4px;
+  user-select: none;
+}
+
+.v2p-image-viewer-counter {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e4e8;
+  padding: 0 6px;
+  font-family: var(--v2-font-mono, monospace);
+  user-select: none;
+}
+
+.v2p-image-viewer-counter:empty {
+  display: none;
+}
+
+.v2p-image-viewer-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 2px;
+}
+
+.v2p-image-viewer-divider.hidden {
+  display: none;
+}
+
+.v2p-image-viewer-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 64px;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(30, 30, 30, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--v2p-radius-md, 8px);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease, background-color 0.15s, color 0.15s, transform 0.15s;
+  user-select: none;
+}
+
+.v2p-image-viewer:hover .v2p-image-viewer-nav.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.v2p-image-viewer-nav.prev {
+  left: 20px;
+}
+
+.v2p-image-viewer-nav.next {
+  right: 20px;
+}
+
+.v2p-image-viewer-nav:hover {
+  background: rgba(30, 30, 30, 0.85);
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.06);
+}
+
+.v2p-image-viewer-nav:active {
+  transform: translateY(-50%) scale(0.95);
 }`;
   GM_addStyle(V2Pro_CSS);
 })();

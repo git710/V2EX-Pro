@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.2
+// @version      1.0.3
 // @description  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @author       git710
@@ -14721,6 +14721,193 @@
         white-space: nowrap;
         opacity: 0.9;
       }
+
+      /* ---------- 7. 图片查看器（PC 端模态弹窗） ---------- */
+      .v2p-image-viewer {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+      }
+      .v2p-image-viewer.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      .v2p-image-viewer-mask {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.78);
+        backdrop-filter: blur(4px);
+        cursor: zoom-out;
+      }
+      .v2p-image-viewer-stage {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .v2p-image-viewer-img {
+        max-width: 90vw;
+        max-height: 90vh;
+        object-fit: contain;
+        pointer-events: auto;
+        cursor: grab;
+        transform-origin: center center;
+        transition: transform 0.08s ease-out;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36);
+        border-radius: var(--v2p-radius-sm, 4px);
+      }
+      .v2p-image-viewer-img.dragging {
+        cursor: grabbing;
+        transition: none;
+      }
+      .v2p-image-viewer-loading {
+        position: absolute;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .v2p-image-viewer-loading.show {
+        opacity: 1;
+      }
+      .v2p-image-viewer-spinner {
+        width: 38px;
+        height: 38px;
+        border: 3px solid rgba(255, 255, 255, 0.25);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: v2p-viewer-spin 0.8s linear infinite;
+      }
+      @keyframes v2p-viewer-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .v2p-image-viewer-toolbar {
+        position: absolute;
+        top: 20px;
+        right: 24px;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        background: rgba(30, 30, 30, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: var(--v2p-radius-md, 8px);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      }
+      .v2p-image-viewer-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        color: #f1f2f4;
+        background: transparent;
+        border: none;
+        border-radius: var(--v2p-radius-sm, 4px);
+        cursor: pointer;
+        transition: background-color 0.15s, color 0.15s, transform 0.1s;
+      }
+      .v2p-image-viewer-btn:hover {
+        background-color: rgba(255, 255, 255, 0.18);
+        color: #ffffff;
+      }
+      .v2p-image-viewer-btn:active {
+        transform: scale(0.95);
+      }
+      .v2p-image-viewer-btn.v2p-image-viewer-close:hover {
+        background-color: rgba(235, 87, 87, 0.85);
+        color: #ffffff;
+      }
+      .v2p-image-viewer-scale-text {
+        min-width: 48px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 500;
+        color: #e2e4e8;
+        font-family: var(--v2-font-mono, monospace);
+        padding: 0 4px;
+        user-select: none;
+      }
+      .v2p-image-viewer-counter {
+        font-size: 13px;
+        font-weight: 600;
+        color: #e2e4e8;
+        padding: 0 6px;
+        font-family: var(--v2-font-mono, monospace);
+        user-select: none;
+      }
+      .v2p-image-viewer-counter:empty {
+        display: none;
+      }
+      .v2p-image-viewer-divider {
+        width: 1px;
+        height: 16px;
+        background: rgba(255, 255, 255, 0.2);
+        margin: 0 2px;
+      }
+      .v2p-image-viewer-divider.hidden {
+        display: none;
+      }
+      .v2p-image-viewer-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 64px;
+        padding: 0;
+        color: rgba(255, 255, 255, 0.75);
+        background: rgba(30, 30, 30, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: var(--v2p-radius-md, 8px);
+        backdrop-filter: blur(8px);
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease, background-color 0.15s, color 0.15s, transform 0.15s;
+        user-select: none;
+      }
+      .v2p-image-viewer:hover .v2p-image-viewer-nav.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      .v2p-image-viewer-nav.prev {
+        left: 20px;
+      }
+      .v2p-image-viewer-nav.next {
+        right: 20px;
+      }
+      .v2p-image-viewer-nav:hover {
+        background: rgba(30, 30, 30, 0.85);
+        color: #ffffff;
+        transform: translateY(-50%) scale(1.06);
+      }
+      .v2p-image-viewer-nav:active {
+        transform: translateY(-50%) scale(0.95);
+      }
       `;
       _GM_addStyle(style2);
 
@@ -17012,6 +17199,363 @@
       window.addEventListener("resize", hideMemberCard);
     }
 
+    function initImageViewerEnhancement() {
+      const root = document.documentElement;
+      if (root.getAttribute("data-v2p-image-viewer-init") === "1") return;
+      root.setAttribute("data-v2p-image-viewer-init", "1");
+
+      const viewerEl = document.createElement("div");
+      viewerEl.className = "v2p-image-viewer";
+      viewerEl.innerHTML = `
+        <div class="v2p-image-viewer-mask"></div>
+        <button type="button" class="v2p-image-viewer-nav prev" title="上一张 (← / A)">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <button type="button" class="v2p-image-viewer-nav next" title="下一张 (→ / D)">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+        <div class="v2p-image-viewer-stage">
+          <img class="v2p-image-viewer-img" src="" referrerpolicy="no-referrer" alt="预览图" />
+          <div class="v2p-image-viewer-loading">
+            <div class="v2p-image-viewer-spinner"></div>
+          </div>
+        </div>
+        <div class="v2p-image-viewer-toolbar">
+          <span class="v2p-image-viewer-counter"></span>
+          <span class="v2p-image-viewer-divider hidden"></span>
+          <button type="button" class="v2p-image-viewer-btn v2p-image-viewer-rotate" title="向右旋转 90° (R)">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </button>
+          <button type="button" class="v2p-image-viewer-btn v2p-image-viewer-zoom-out" title="缩小 (滚轮向下)">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+          </button>
+          <span class="v2p-image-viewer-scale-text">100%</span>
+          <button type="button" class="v2p-image-viewer-btn v2p-image-viewer-zoom-in" title="放大 (滚轮向上)">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+          </button>
+          <button type="button" class="v2p-image-viewer-btn v2p-image-viewer-reset" title="重置大小与旋转 (双击)">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+          </button>
+          <a class="v2p-image-viewer-btn v2p-image-viewer-origin" target="_blank" rel="noopener noreferrer" title="查看原图 (新窗口)">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </a>
+          <button type="button" class="v2p-image-viewer-btn v2p-image-viewer-close" title="关闭 (ESC / 点击遮罩)">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      `;
+      document.body.appendChild(viewerEl);
+
+      const maskEl = viewerEl.querySelector(".v2p-image-viewer-mask");
+      const stageEl = viewerEl.querySelector(".v2p-image-viewer-stage");
+      const imgEl = viewerEl.querySelector(".v2p-image-viewer-img");
+      const loadingEl = viewerEl.querySelector(".v2p-image-viewer-loading");
+      const scaleTextEl = viewerEl.querySelector(".v2p-image-viewer-scale-text");
+      const counterEl = viewerEl.querySelector(".v2p-image-viewer-counter");
+      const dividerEl = viewerEl.querySelector(".v2p-image-viewer-divider");
+      const rotateBtn = viewerEl.querySelector(".v2p-image-viewer-rotate");
+      const zoomInBtn = viewerEl.querySelector(".v2p-image-viewer-zoom-in");
+      const zoomOutBtn = viewerEl.querySelector(".v2p-image-viewer-zoom-out");
+      const resetBtn = viewerEl.querySelector(".v2p-image-viewer-reset");
+      const originBtn = viewerEl.querySelector(".v2p-image-viewer-origin");
+      const closeBtn = viewerEl.querySelector(".v2p-image-viewer-close");
+      const prevBtn = viewerEl.querySelector(".v2p-image-viewer-nav.prev");
+      const nextBtn = viewerEl.querySelector(".v2p-image-viewer-nav.next");
+
+      let isOpen = false;
+      let currentScale = 1;
+      let currentRotate = 0;
+      let translateX = 0;
+      let translateY = 0;
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let initialTranslateX = 0;
+      let initialTranslateY = 0;
+      let previousBodyOverflow = "";
+
+      let galleryList = [];
+      let galleryIndex = 0;
+
+      function updateTransform() {
+        imgEl.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${currentScale}) rotate(${currentRotate}deg)`;
+        scaleTextEl.textContent = `${Math.round(currentScale * 100)}%`;
+      }
+
+      function resetState() {
+        currentScale = 1;
+        currentRotate = 0;
+        translateX = 0;
+        translateY = 0;
+        isDragging = false;
+        imgEl.classList.remove("dragging");
+        updateTransform();
+      }
+
+      function setScale(newScale) {
+        const clamped = Math.min(Math.max(newScale, 0.2), 5);
+        currentScale = Math.round(clamped * 100) / 100;
+        updateTransform();
+      }
+
+      function rotateViewer() {
+        currentRotate = (currentRotate + 90) % 360;
+        updateTransform();
+      }
+
+      function updateGalleryUI() {
+        const count = galleryList.length;
+        if (count > 1) {
+          counterEl.textContent = `${galleryIndex + 1} / ${count}`;
+          dividerEl.classList.remove("hidden");
+          prevBtn.classList.add("show");
+          nextBtn.classList.add("show");
+        } else {
+          counterEl.textContent = "";
+          dividerEl.classList.add("hidden");
+          prevBtn.classList.remove("show");
+          nextBtn.classList.remove("show");
+        }
+      }
+
+      function switchImage(targetIndex) {
+        if (!galleryList.length) return;
+        const count = galleryList.length;
+        galleryIndex = ((targetIndex % count) + count) % count;
+        const item = galleryList[galleryIndex];
+        if (!item) return;
+
+        resetState();
+        updateGalleryUI();
+
+        const targetUrl = item.originHref || item.src;
+        originBtn.href = targetUrl;
+
+        loadingEl.classList.add("show");
+        imgEl.style.opacity = "0";
+        imgEl.src = item.src;
+
+        const testImg = document.createElement("img");
+        testImg.referrerPolicy = "no-referrer";
+        testImg.onload = () => {
+          if (!isOpen) return;
+          loadingEl.classList.remove("show");
+          imgEl.style.opacity = "1";
+        };
+        testImg.onerror = () => {
+          if (!isOpen) return;
+          loadingEl.classList.remove("show");
+          imgEl.style.opacity = "1";
+        };
+        testImg.src = item.src;
+      }
+
+      function collectGallery(clickedImg) {
+        let scope = document;
+        const postDetail = clickedImg.closest ? clickedImg.closest(".post-detail") : null;
+        if (postDetail) {
+          scope = postDetail;
+        } else {
+          scope = document.querySelector("#Main") || document;
+        }
+
+        const imgs = Array.from(scope.querySelectorAll(IMAGE_PARENT_SELECTORS + " img")).filter(isEligibleImage);
+        const uniqueImgs = [];
+        const seen = new Set();
+        imgs.forEach((img) => {
+          if (!seen.has(img)) {
+            seen.add(img);
+            const resolved = resolveOriginalSrc(img);
+            if (resolved.src) {
+              uniqueImgs.push({ img, src: resolved.src, originHref: resolved.originHref });
+            }
+          }
+        });
+
+        let idx = uniqueImgs.findIndex((item) => item.img === clickedImg);
+        if (idx === -1) {
+          const fallback = resolveOriginalSrc(clickedImg);
+          uniqueImgs.unshift({ img: clickedImg, src: fallback.src, originHref: fallback.originHref });
+          idx = 0;
+        }
+        return { list: uniqueImgs, index: idx };
+      }
+
+      function openViewer(clickedImg) {
+        if (!clickedImg) return;
+        isOpen = true;
+
+        const gallery = collectGallery(clickedImg);
+        galleryList = gallery.list;
+        galleryIndex = gallery.index;
+
+        switchImage(galleryIndex);
+
+        previousBodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        viewerEl.classList.add("show");
+      }
+
+      function closeViewer() {
+        if (!isOpen) return;
+        isOpen = false;
+        viewerEl.classList.remove("show");
+        document.body.style.overflow = previousBodyOverflow;
+        setTimeout(() => {
+          if (!isOpen) {
+            imgEl.src = "";
+            galleryList = [];
+            galleryIndex = 0;
+            resetState();
+          }
+        }, 200);
+      }
+
+      rotateBtn.addEventListener("click", rotateViewer);
+      zoomInBtn.addEventListener("click", () => setScale(currentScale + 0.25));
+      zoomOutBtn.addEventListener("click", () => setScale(currentScale - 0.25));
+      resetBtn.addEventListener("click", resetState);
+      closeBtn.addEventListener("click", closeViewer);
+      maskEl.addEventListener("click", closeViewer);
+
+      prevBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        switchImage(galleryIndex - 1);
+      });
+
+      nextBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        switchImage(galleryIndex + 1);
+      });
+
+      stageEl.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
+          const step = e.deltaY < 0 ? 0.15 : -0.15;
+          setScale(currentScale + step);
+        },
+        { passive: false },
+      );
+
+      // 双击智能切换：当前为 1.0 时放大至 2.0，已缩放时还原 1.0
+      imgEl.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+        if (currentScale === 1) {
+          setScale(2);
+        } else {
+          resetState();
+        }
+      });
+
+      imgEl.addEventListener("mousedown", (e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        isDragging = true;
+        imgEl.classList.add("dragging");
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        initialTranslateX = translateX;
+        initialTranslateY = translateY;
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        translateX = initialTranslateX + (e.clientX - dragStartX);
+        translateY = initialTranslateY + (e.clientY - dragStartY);
+        updateTransform();
+      });
+
+      window.addEventListener("mouseup", () => {
+        if (!isDragging) return;
+        isDragging = false;
+        imgEl.classList.remove("dragging");
+      });
+
+      window.addEventListener(
+        "keydown",
+        (e) => {
+          if (!isOpen) return;
+          if (e.key === "Escape" || e.keyCode === 27) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            closeViewer();
+            return;
+          }
+          if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+            e.preventDefault();
+            e.stopPropagation();
+            switchImage(galleryIndex - 1);
+            return;
+          }
+          if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+            e.preventDefault();
+            e.stopPropagation();
+            switchImage(galleryIndex + 1);
+            return;
+          }
+          if (e.key === "r" || e.key === "R") {
+            e.preventDefault();
+            e.stopPropagation();
+            rotateViewer();
+            return;
+          }
+        },
+        true,
+      );
+
+      const IMAGE_PARENT_SELECTORS = [
+        ".topic_content",
+        ".reply_content",
+        ".markdown_body",
+        ".embedded_image",
+        ".post-detail .post-wrapper",
+        ".post-detail .comment-wrapper",
+      ].join(",");
+
+      function isEligibleImage(img) {
+        if (!img || img.tagName !== "IMG") return false;
+        if (img.classList.contains("avatar") || (img.closest && img.closest(".avatar"))) return false;
+        if (img.closest && img.closest(".emoticon-pack, .emoji, [data-emoji]")) return false;
+        if (!img.closest || !img.closest(IMAGE_PARENT_SELECTORS)) return false;
+        if (img.naturalWidth > 0 && img.naturalWidth <= 32 && img.naturalHeight > 0 && img.naturalHeight <= 32) {
+          return false;
+        }
+        return true;
+      }
+
+      function resolveOriginalSrc(img) {
+        const parentA = img.closest ? img.closest("a") : null;
+        if (parentA && parentA.href) {
+          const href = parentA.href.trim();
+          if (/\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(href) || href.includes("imgur.com")) {
+            return { src: href, originHref: href };
+          }
+        }
+        const originUrl = img.getAttribute("originUrl") || (img.dataset ? img.dataset.origin : "");
+        const src = originUrl || img.currentSrc || img.src;
+        return { src, originHref: parentA ? parentA.href : src };
+      }
+
+      document.addEventListener(
+        "click",
+        function (e) {
+          const target = e.target;
+          if (!target) return;
+          const img = target.tagName === "IMG" ? target : (target.closest ? target.closest("img") : null);
+          if (!isEligibleImage(img)) return;
+
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+
+          openViewer(img);
+        },
+        true,
+      );
+    }
+
     async function init() {
       let userLink = document.querySelector("#Top .tools a[href^='/member/']");
       if (userLink) {
@@ -17224,6 +17768,7 @@
       initTopTabsCustomize();
       initReplyEnhancements();
       initMemberHoverCards();
+      initImageViewerEnhancement();
       if (window.isLogin) {
         initNoteData();
         try {
