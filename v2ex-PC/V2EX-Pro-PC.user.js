@@ -17387,8 +17387,46 @@
         }
       }
 
-      function switchImage(targetIndex) {
+      let switchTimer = null;
+
+      function performEnterAnimation(direction) {
+        if (!isOpen) return;
+        loadingEl.classList.remove("show");
+
+        if (direction === 0) {
+          imgEl.style.transition = "none";
+          imgEl.style.transform = "translate3d(0, 0, 0) scale(0.95)";
+          imgEl.style.opacity = "0";
+          void imgEl.offsetWidth;
+          imgEl.style.transition =
+            "transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out";
+          imgEl.style.transform = "translate3d(0, 0, 0) scale(1)";
+          imgEl.style.opacity = "1";
+        } else {
+          const enterOffset = direction > 0 ? 50 : -50;
+          imgEl.style.transition = "none";
+          imgEl.style.transform = `translate3d(${enterOffset}px, 0, 0) scale(0.96)`;
+          imgEl.style.opacity = "0";
+          void imgEl.offsetWidth;
+          imgEl.style.transition =
+            "transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease-out";
+          imgEl.style.transform = "translate3d(0, 0, 0) scale(1)";
+          imgEl.style.opacity = "1";
+        }
+
+        setTimeout(() => {
+          if (!isOpen || isDragging) return;
+          imgEl.style.transition = "";
+        }, 250);
+      }
+
+      function switchImage(targetIndex, direction = 0) {
         if (!galleryList.length) return;
+        if (switchTimer) {
+          clearTimeout(switchTimer);
+          switchTimer = null;
+        }
+
         const count = galleryList.length;
         galleryIndex = ((targetIndex % count) + count) % count;
         const item = galleryList[galleryIndex];
@@ -17400,23 +17438,30 @@
         const targetUrl = item.originHref || item.src;
         originBtn.href = targetUrl;
 
-        loadingEl.classList.add("show");
-        imgEl.style.opacity = "0";
-        imgEl.src = item.src;
+        // 若当前有可见图片且指定了切换方向，执行轻量滑出退场动效（120ms）
+        if (direction !== 0 && imgEl.src && imgEl.style.opacity !== "0") {
+          const exitOffset = direction > 0 ? -50 : 50;
+          imgEl.style.transition = "transform 0.12s ease-in, opacity 0.12s ease-in";
+          imgEl.style.transform = `translate3d(${exitOffset}px, 0, 0) scale(0.96)`;
+          imgEl.style.opacity = "0";
+        }
 
-        const testImg = document.createElement("img");
-        testImg.referrerPolicy = "no-referrer";
-        testImg.onload = () => {
-          if (!isOpen) return;
-          loadingEl.classList.remove("show");
-          imgEl.style.opacity = "1";
+        const doLoadNext = () => {
+          loadingEl.classList.add("show");
+          imgEl.src = item.src;
+
+          const testImg = document.createElement("img");
+          testImg.referrerPolicy = "no-referrer";
+          testImg.onload = () => performEnterAnimation(direction);
+          testImg.onerror = () => performEnterAnimation(direction);
+          testImg.src = item.src;
         };
-        testImg.onerror = () => {
-          if (!isOpen) return;
-          loadingEl.classList.remove("show");
-          imgEl.style.opacity = "1";
-        };
-        testImg.src = item.src;
+
+        if (direction !== 0) {
+          switchTimer = setTimeout(doLoadNext, 120);
+        } else {
+          doLoadNext();
+        }
       }
 
       function collectGallery(clickedImg) {
@@ -17458,7 +17503,7 @@
         galleryList = gallery.list;
         galleryIndex = gallery.index;
 
-        switchImage(galleryIndex);
+        switchImage(galleryIndex, 0);
 
         previousBodyOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
@@ -17468,6 +17513,10 @@
       function closeViewer() {
         if (!isOpen) return;
         isOpen = false;
+        if (switchTimer) {
+          clearTimeout(switchTimer);
+          switchTimer = null;
+        }
         viewerEl.classList.remove("show");
         document.body.style.overflow = previousBodyOverflow;
         setTimeout(() => {
@@ -17489,12 +17538,12 @@
 
       prevBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        switchImage(galleryIndex - 1);
+        switchImage(galleryIndex - 1, -1);
       });
 
       nextBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        switchImage(galleryIndex + 1);
+        switchImage(galleryIndex + 1, 1);
       });
 
       stageEl.addEventListener(
@@ -17555,13 +17604,13 @@
           if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
             e.preventDefault();
             e.stopPropagation();
-            switchImage(galleryIndex - 1);
+            switchImage(galleryIndex - 1, -1);
             return;
           }
           if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
             e.preventDefault();
             e.stopPropagation();
-            switchImage(galleryIndex + 1);
+            switchImage(galleryIndex + 1, 1);
             return;
           }
           if (e.key === "r" || e.key === "R") {

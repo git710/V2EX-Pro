@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - H5
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.3
+// @version      1.0.4
 // @description  V2EX 网页增强脚本（移动端 H5）：四套主题、回复定位与预览、楼层直达、用户标签、高赞回复、楼中楼优化、表情回复、整页 Base64 解析、节点导航自定义、WebDAV 配置同步、自动签到。须与「V2EX Pro - H5 style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（移动端 H5）：四套主题、回复定位与预览、楼层直达、用户标签、高赞回复、楼中楼优化、表情回复、整页 Base64 解析、节点导航自定义、WebDAV 配置同步、自动签到。须与「V2EX Pro - H5 style」样式脚本一同启用。
 // @author       git710
@@ -9558,8 +9558,46 @@ runAfterLoaded(() => {
       }
     }
 
-    function switchImage(targetIndex) {
+    let switchTimer = null;
+
+    function performEnterAnimation(direction) {
+      if (!isOpen) return;
+      loadingEl.classList.remove("show");
+
+      if (direction === 0) {
+        imgEl.style.transition = "none";
+        imgEl.style.transform = "translate3d(0, 0, 0) scale(0.95)";
+        imgEl.style.opacity = "0";
+        void imgEl.offsetWidth;
+        imgEl.style.transition =
+          "transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out";
+        imgEl.style.transform = "translate3d(0, 0, 0) scale(1)";
+        imgEl.style.opacity = "1";
+      } else {
+        const enterOffset = direction > 0 ? 50 : -50;
+        imgEl.style.transition = "none";
+        imgEl.style.transform = `translate3d(${enterOffset}px, 0, 0) scale(0.96)`;
+        imgEl.style.opacity = "0";
+        void imgEl.offsetWidth;
+        imgEl.style.transition =
+          "transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease-out";
+        imgEl.style.transform = "translate3d(0, 0, 0) scale(1)";
+        imgEl.style.opacity = "1";
+      }
+
+      setTimeout(() => {
+        if (!isOpen) return;
+        imgEl.style.transition = "";
+      }, 250);
+    }
+
+    function switchImage(targetIndex, direction = 0) {
       if (!galleryList.length) return;
+      if (switchTimer) {
+        clearTimeout(switchTimer);
+        switchTimer = null;
+      }
+
       const count = galleryList.length;
       galleryIndex = ((targetIndex % count) + count) % count;
       const item = galleryList[galleryIndex];
@@ -9571,23 +9609,29 @@ runAfterLoaded(() => {
       const targetUrl = item.originHref || item.src;
       originBtn.href = targetUrl;
 
-      loadingEl.classList.add("show");
-      imgEl.style.opacity = "0";
-      imgEl.src = item.src;
+      if (direction !== 0 && imgEl.src && imgEl.style.opacity !== "0") {
+        const exitOffset = direction > 0 ? -50 : 50;
+        imgEl.style.transition = "transform 0.12s ease-in, opacity 0.12s ease-in";
+        imgEl.style.transform = `translate3d(${exitOffset}px, 0, 0) scale(0.96)`;
+        imgEl.style.opacity = "0";
+      }
 
-      const testImg = document.createElement("img");
-      testImg.referrerPolicy = "no-referrer";
-      testImg.onload = () => {
-        if (!isOpen) return;
-        loadingEl.classList.remove("show");
-        imgEl.style.opacity = "1";
+      const doLoadNext = () => {
+        loadingEl.classList.add("show");
+        imgEl.src = item.src;
+
+        const testImg = document.createElement("img");
+        testImg.referrerPolicy = "no-referrer";
+        testImg.onload = () => performEnterAnimation(direction);
+        testImg.onerror = () => performEnterAnimation(direction);
+        testImg.src = item.src;
       };
-      testImg.onerror = () => {
-        if (!isOpen) return;
-        loadingEl.classList.remove("show");
-        imgEl.style.opacity = "1";
-      };
-      testImg.src = item.src;
+
+      if (direction !== 0) {
+        switchTimer = setTimeout(doLoadNext, 120);
+      } else {
+        doLoadNext();
+      }
     }
 
     const IMAGE_PARENT_SELECTORS = [
@@ -9654,7 +9698,7 @@ runAfterLoaded(() => {
       galleryList = gallery.list;
       galleryIndex = gallery.index;
 
-      switchImage(galleryIndex);
+      switchImage(galleryIndex, 0);
 
       previousBodyOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
@@ -9664,6 +9708,10 @@ runAfterLoaded(() => {
     function closeViewer() {
       if (!isOpen) return;
       isOpen = false;
+      if (switchTimer) {
+        clearTimeout(switchTimer);
+        switchTimer = null;
+      }
       viewerEl.classList.remove("show");
       document.body.style.overflow = previousBodyOverflow;
       setTimeout(() => {
@@ -9765,9 +9813,9 @@ runAfterLoaded(() => {
 
             if (absX > 50 && absX > absY * 1.2) {
               if (deltaX > 0) {
-                switchImage(galleryIndex - 1);
+                switchImage(galleryIndex - 1, -1);
               } else {
-                switchImage(galleryIndex + 1);
+                switchImage(galleryIndex + 1, 1);
               }
               return;
             }
