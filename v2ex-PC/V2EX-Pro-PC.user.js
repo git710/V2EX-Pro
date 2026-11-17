@@ -930,6 +930,29 @@
         }
       });
     },
+    // 外链新标签页：独立捕获阶段委托，不受 stopMe / 页面类型 / 冒泡拦截影响
+    bindExternalLinkNewTab() {
+      if (window.__v2pExternalLinkBound) return;
+      window.__v2pExternalLinkBound = true;
+      document.addEventListener(
+        "click",
+        (e2) => {
+          if (e2.defaultPrevented || e2.button !== 0) return;
+          if (e2.ctrlKey || e2.metaKey || e2.shiftKey || e2.altKey) return;
+          const a =
+            e2.target && e2.target.closest && e2.target.closest("a[href]");
+          if (!a || a.getAttribute("script")) return;
+          if (!window.config || window.config.openExternalLinkInNewTab === false)
+            return;
+          const href = a.href;
+          if (!functions.isExternalLink(href)) return;
+          e2.preventDefault();
+          e2.stopPropagation();
+          functions.openNewTab(href, window.config.newTabOpenActive);
+        },
+        true,
+      );
+    },
     //检测页面类型
     checkPageType(a) {
       let l = a || window.location;
@@ -13064,6 +13087,8 @@
     window.isLogin = false;
     window.postList = [];
     window.isDeadline = dayjs().isAfter(dayjs("2024-11-26"));
+    // 外链新标签页委托独立于 stopMe 与页面类型，避免外链行为被静默关闭
+    functions.bindExternalLinkNewTab();
     window.parse = {
       //解析主题内容
       async parsePostContent(post, body, htmlText) {
@@ -17899,6 +17924,8 @@
       }
       addSettingText();
       initMonkeyMenu();
+      // 初始外链补 target="_blank"，即使后续事件委托异常也能靠浏览器原生新标签打开
+      functions.applyExternalLinkTargets(document.body);
       window.addEventListener(
         "error",
         (e2) => {
