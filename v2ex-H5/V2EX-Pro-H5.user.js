@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - H5
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.4
+// @version      1.0.5
 // @description  V2EX 网页增强脚本（移动端 H5）：四套主题、回复定位与预览、楼层直达、用户标签、高赞回复、楼中楼优化、表情回复、整页 Base64 解析、节点导航自定义、WebDAV 配置同步、自动签到。须与「V2EX Pro - H5 style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（移动端 H5）：四套主题、回复定位与预览、楼层直达、用户标签、高赞回复、楼中楼优化、表情回复、整页 Base64 解析、节点导航自定义、WebDAV 配置同步、自动签到。须与「V2EX Pro - H5 style」样式脚本一同启用。
 // @author       git710
@@ -441,6 +441,31 @@
     html.includes("已连续登录") ||
     html.includes("每日登录奖励已领取");
 
+  // 签到请求统一走 GM_xmlhttpRequest：用户脚本沙箱里的原生 fetch 在部分手机浏览器
+  // （如手机 Edge）上不携带当前站点登录 Cookie，/mission/daily 会被当成未登录页，
+  // 进而被误判为“今日已签到”而静默跳过。GM 层请求与桌面端行为一致，稳定携带同源 Cookie。
+  const signinFetch = (url) =>
+    new Promise((resolve) => {
+      try {
+        GM_xmlhttpRequest({
+          method: "GET",
+          url,
+          timeout: 15000,
+          onload: (res) =>
+            resolve({
+              ok: res.status >= 200 && res.status < 400,
+              status: res.status,
+              text: res.responseText || "",
+              finalUrl: res.finalUrl || "",
+            }),
+          onerror: () => resolve({ ok: false, status: 0, text: "", finalUrl: "" }),
+          ontimeout: () => resolve({ ok: false, status: 0, text: "", finalUrl: "" }),
+        });
+      } catch (e) {
+        resolve({ ok: false, status: 0, text: "" });
+      }
+    });
+
   // 提取确切的兑换 URL：与 PC 端保持高度一致，并加入移动端菜单兜底
   const extractRedeemUrl = (dailyHtml) => {
     const redeemMatch =
@@ -464,13 +489,36 @@
     return null;
   };
 
+  // “今日未签”最可靠的信号：daily 页里存在兑换入口（后端路由，与模板/文案无关）。
+  // “已连续登录 / fa-ok-sign / 每日登录奖励已领取”等文案在多种模板里都会出现，
+  // 未签时也可能命中，绝不能作为已签依据。
+  const hasRedeemEntry = (html) => /\/mission\/daily\/redeem\?once=\d+/.test(html);
+  const isDailyRewardPage = (html) =>
+    html.includes("每日登录奖励") || html.includes("mission/daily") || html.includes("每日任务");
+
   async function qianDao() {
-    if (!isAutoSigninEnabled()) return;
+    if (!isAutoSigninEnabled()) {
+      return;
+    }
 
     const timeNow = getClockInDate();
 
-    // 1. 如果本地记录今天已签过到，直接略过，不发网络请求，不弹任何提示
-    if (localStorage.getItem(CLOCK_IN_TIME_KEY) === timeNow) return;
+    // 1. 本地记录今天已签过到：确认一次再决定是否跳过。
+    //    旧版本在未登录/异常页上会误写这个标记，导致本端永远跳过、每天“签到不成功”。
+    //    只有 daily 页确实显示已签（或请求失败需保守跳过）才维持；否则清掉标记继续签到。
+    if (localStorage.getItem(CLOCK_IN_TIME_KEY) === timeNow) {
+      const probe = await signinFetch(location.origin + "/mission/daily");
+      if (!probe.ok) {
+        return;
+      }
+      const probeHtml = probe.text;
+      const probeEntry = hasRedeemEntry(probeHtml);
+      // 只有“无兑换入口 + 正常奖励页”才是真已签；页面还有 redeem 入口说明未签，标记是误写的。
+      if (!probeEntry && isDailyRewardPage(probeHtml)) {
+        return;
+      }
+      localStorage.removeItem(CLOCK_IN_TIME_KEY);
+    }
 
     // 2. 如果在首页且有特别奖励入口就直接点掉
     if (isHomePage()) {
@@ -490,17 +538,15 @@
         }, 3500);
         return;
       }
-      // 桌面端模板兼容：首页没有签到入口但已登录，说明今日已在其他端完成签到
-      const qiandaoEntry = document.querySelector('.box .inner a[href="/mission/daily"]');
-      const userBox = document.querySelector("#Rightbar .box .inner");
-      if (!qiandaoEntry && userBox) {
-        localStorage.setItem(CLOCK_IN_TIME_KEY, timeNow);
-        return;
-      }
+      // 桌面端模板兼容：首页没有签到入口时不再直接写“今日已签”标记后返回。
+      // 模板结构差异或局部渲染都可能造成误判，让本端永远跳过签到。
+      // 改为落到下面的并发锁与 doAutoSignIn，由 /mission/daily 权威确认签到状态。
     }
 
     // 3. 并发防重锁（防止多标签页同时并发签到）
-    if (sessionStorage.getItem(SIGNING_LOCK_KEY) === timeNow) return;
+    if (sessionStorage.getItem(SIGNING_LOCK_KEY) === timeNow) {
+      return;
+    }
     sessionStorage.setItem(SIGNING_LOCK_KEY, timeNow);
 
     try {
@@ -514,28 +560,31 @@
 
   async function doAutoSignIn(timeNow) {
     // 第一步：探测 /mission/daily 页面状态，精准判断是否需要签到并获取权威的 redeem?once= 参数
-    let dailyRes;
-    try {
-      dailyRes = await fetch(location.origin + "/mission/daily", {
-        credentials: "same-origin",
-      });
-    } catch (err) {
-      console.warn("[V2EX Pro] 请求 /mission/daily 失败:", err);
+    const dailyRes = await signinFetch(location.origin + "/mission/daily");
+    if (!dailyRes.ok) {
+      console.warn("[V2EX Pro] 请求 /mission/daily 失败, HTTP:", dailyRes.status);
+      v2pShowToast("自动签到：网络请求失败，请稍后重试", 4000, "warning");
       return;
     }
 
-    if (!dailyRes.ok) return;
+    const dailyHtml = dailyRes.text;
 
-    const dailyHtml = await dailyRes.text();
-
-    // 判断是否已经签过到（页面出现“每日登录奖励已领取”或没有“领取”按钮）
-    const hasRedeemBtn =
-      dailyHtml.includes('value="领取') ||
-      dailyHtml.includes("mission/daily/redeem");
-    if (!hasRedeemBtn) {
-      // 已签到过：直接略过，静默记录本地时间戳，不弹任何提示
+    // 以“是否还有兑换入口”为权威判断签到状态：
+    // “已连续登录 / fa-ok-sign” 等文案在多种模板里都会出现，不可靠，不再作为已签依据。
+    // 1) 正常奖励页且无兑换入口 → 今日已签，静默记录时间戳并跳过；
+    // 2) 有兑换入口 → 未签，继续兑换；
+    // 3) 非奖励页（未登录跳转/异常页）→ 不写标记，给可见提示，允许下次重试。
+    const dailyEntry = hasRedeemEntry(dailyHtml);
+    const dailyPage = isDailyRewardPage(dailyHtml);
+    if (!dailyEntry && dailyPage) {
       localStorage.setItem(CLOCK_IN_TIME_KEY, timeNow);
       console.info("[V2EX Pro] 检测到今日已完成签到，静默跳过。");
+      return;
+    }
+
+    if (!dailyEntry) {
+      console.warn("[V2EX Pro] 签到状态未知：未检测到兑换入口，页面可能未登录或异常。");
+      v2pShowToast("自动签到：未能确认签到状态，请检查登录态", 4500, "warning");
       return;
     }
 
@@ -543,22 +592,26 @@
     const redeemUrl = extractRedeemUrl(dailyHtml);
     if (!redeemUrl) {
       console.warn("[V2EX Pro] 无法获取签到 redeem URL！");
+      v2pShowToast("自动签到：无法获取签到凭证，请稍后重试", 4000, "warning");
       return;
     }
 
     // 第三步：发起签到兑换请求
-    let redeemRes;
-    try {
-      redeemRes = await fetch(redeemUrl, { credentials: "same-origin" });
-    } catch (err) {
-      console.warn("[V2EX Pro] 签到兑换请求失败:", err);
+    const redeemRes = await signinFetch(redeemUrl);
+    if (!redeemRes.ok) {
+      console.warn("[V2EX Pro] 签到兑换请求失败, HTTP:", redeemRes.status);
+      v2pShowToast("自动签到：兑换请求失败，请稍后重试", 4000, "warning");
       return;
     }
 
-    if (!redeemRes.ok) return;
-
-    const resultHtml = await redeemRes.text();
-    const isSuccess = isRedeemSuccess(resultHtml);
+    // 第四步：以 /mission/daily 的权威状态复核签到结果。
+    // 部分手机端 GM 引擎不跟随 redeem 的 302 跳转，redeem 响应体为空，
+    // 仅凭 isRedeemSuccess(redeem 响应) 会误判为失败。复查 daily 页最可靠。
+    const verifyRes = await signinFetch(location.origin + "/mission/daily?t=" + Date.now());
+    const verifyClaimed =
+      verifyRes.ok && !hasRedeemEntry(verifyRes.text) && isDailyRewardPage(verifyRes.text);
+    const isSuccess = verifyClaimed;
+    const resultHtml = redeemRes.text + "\n" + verifyRes.text;
 
     if (isSuccess) {
       localStorage.setItem(CLOCK_IN_TIME_KEY, timeNow);
@@ -619,19 +672,26 @@
       if (qiandao) {
         qiandao.textContent = "自动签到未成功，请手动签到";
       }
+      v2pShowToast("自动签到未成功，请手动签到", 4500, "warning");
     }
   }
 
-  // 顶栏异步渲染，轮询等待登录态出现（最多 3 秒）
+  // 顶栏异步渲染，轮询等待登录态出现（最多 6 秒）。
+  // 部分移动端顶栏 DOM 结构与桌面不同，仅靠 signout/member 链接会漏判，
+  // 因此把“页面存在签到入口”也作为已登录信号。
+  const hasSigninEntry = () =>
+    !!document.querySelector(
+      'a[href="/mission/daily"], a[href*="/mission/daily"], #gift_v2excellent',
+    );
   const scheduleCheckin = () => {
     let retries = 0;
     const tryRun = () => {
-      if (isLoggedIn()) {
+      if (isLoggedIn() || hasSigninEntry()) {
         void qianDao();
         return;
       }
       retries += 1;
-      if (retries < 10) setTimeout(tryRun, 300);
+      if (retries < 20) setTimeout(tryRun, 300);
     };
     tryRun();
   };

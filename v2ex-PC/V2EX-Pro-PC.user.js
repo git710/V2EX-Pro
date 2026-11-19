@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.4
+// @version      1.0.5
 // @description  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @author       git710
