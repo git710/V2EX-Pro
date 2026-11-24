@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC style
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.5
+// @version      1.0.6
 // @description  V2EX Pro PC 端样式脚本：统一设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁背景与主题类注入。须先于「V2EX Pro - PC」主脚本启用。
 // @description:zh-CN  V2EX Pro PC 端样式脚本：统一设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁背景与主题类注入。须先于「V2EX Pro - PC」主脚本启用。
 // @author       git710

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - H5 style
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.5
+// @version      1.0.6
 // @description  V2EX Pro 移动端样式脚本：设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁注入与响应式布局。须与「V2EX Pro - H5」主脚本一同启用。
 // @description:zh-CN  V2EX Pro 移动端样式脚本：设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁注入与响应式布局。须与「V2EX Pro - H5」主脚本一同启用。
 // @author       git710
