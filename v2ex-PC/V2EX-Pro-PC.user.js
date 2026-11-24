@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.4
+// @version      1.0.5
 // @description  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（PC 端）：楼中楼与嵌套回复、弹框查看主题、回复定位与上下文、高赞回复、用户标签、成员悬浮卡、表情回复、Base64 工具箱、顶部导航自定义、自动签到、钉钉通知。须与「V2EX Pro - PC style」样式脚本一同启用。
 // @author       git710
@@ -920,15 +920,18 @@
       }
     },
     applyExternalLinkTargets(context) {
-      if (window.config && window.config.openExternalLinkInNewTab === false) return;
+      if (window.config && window.config.openExternalLinkInNewTab === false)
+        return;
       let root = context || document;
-      $(root).find("a[href]").each((_, el) => {
-        let href = el.getAttribute("href");
-        if (functions.isExternalLink(href)) {
-          el.setAttribute("target", "_blank");
-          el.setAttribute("rel", "noopener noreferrer");
-        }
-      });
+      $(root)
+        .find("a[href]")
+        .each((_, el) => {
+          let href = el.getAttribute("href");
+          if (functions.isExternalLink(href)) {
+            el.setAttribute("target", "_blank");
+            el.setAttribute("rel", "noopener noreferrer");
+          }
+        });
     },
     //检测页面类型
     checkPageType(a) {
@@ -4146,72 +4149,68 @@
               "外观主题",
             ),
             vue.createElementVNode("div", { class: "wrapper" }, [
-              vue.createElementVNode(
-                "div",
-                { class: "radio-group2" },
-                [
-                  vue.createElementVNode(
-                    "div",
-                    {
-                      class: vue.normalizeClass([
-                        "radio",
-                        this.currentTheme === "light" && "active",
-                      ]),
-                      onClick: () => this.setTheme("light"),
-                    },
-                    "浅色",
-                    2,
-                  ),
-                  vue.createElementVNode(
-                    "div",
-                    {
-                      class: vue.normalizeClass([
-                        "radio",
-                        this.currentTheme === "dawn" && "active",
-                      ]),
-                      onClick: () => this.setTheme("dawn"),
-                    },
-                    "晨光",
-                    2,
-                  ),
-                  vue.createElementVNode(
-                    "div",
-                    {
-                      class: vue.normalizeClass([
-                        "radio",
-                        this.currentTheme === "aqua" && "active",
-                      ]),
-                      onClick: () => this.setTheme("aqua"),
-                    },
-                    "水色",
-                    2,
-                  ),
-                  vue.createElementVNode(
-                    "div",
-                    {
-                      class: vue.normalizeClass([
-                        "radio",
-                        this.currentTheme === "dark" && "active",
-                      ]),
-                      onClick: () => this.setTheme("dark"),
-                    },
-                    "深色",
-                    2,
-                  ),
-                  vue.createElementVNode(
-                    "div",
-                    {
-                      class: vue.normalizeClass([
-                        "radio",
-                        this.currentTheme === "auto" && "active",
-                      ]),
-                      onClick: () => this.setTheme("auto"),
-                    },
-                    "跟随系统",
-                    2,
-                  ),
-                ],
-              ),
+              vue.createElementVNode("div", { class: "radio-group2" }, [
+                vue.createElementVNode(
+                  "div",
+                  {
+                    class: vue.normalizeClass([
+                      "radio",
+                      this.currentTheme === "light" && "active",
+                    ]),
+                    onClick: () => this.setTheme("light"),
+                  },
+                  "浅色",
+                  2,
+                ),
+                vue.createElementVNode(
+                  "div",
+                  {
+                    class: vue.normalizeClass([
+                      "radio",
+                      this.currentTheme === "dawn" && "active",
+                    ]),
+                    onClick: () => this.setTheme("dawn"),
+                  },
+                  "晨光",
+                  2,
+                ),
+                vue.createElementVNode(
+                  "div",
+                  {
+                    class: vue.normalizeClass([
+                      "radio",
+                      this.currentTheme === "aqua" && "active",
+                    ]),
+                    onClick: () => this.setTheme("aqua"),
+                  },
+                  "水色",
+                  2,
+                ),
+                vue.createElementVNode(
+                  "div",
+                  {
+                    class: vue.normalizeClass([
+                      "radio",
+                      this.currentTheme === "dark" && "active",
+                    ]),
+                    onClick: () => this.setTheme("dark"),
+                  },
+                  "深色",
+                  2,
+                ),
+                vue.createElementVNode(
+                  "div",
+                  {
+                    class: vue.normalizeClass([
+                      "radio",
+                      this.currentTheme === "auto" && "active",
+                    ]),
+                    onClick: () => this.setTheme("auto"),
+                  },
+                  "跟随系统",
+                  2,
+                ),
+              ]),
             ]),
           ]),
           vue.createElementVNode(
@@ -4509,328 +4508,491 @@
                       $options.handleModalWheel(...args)),
                 },
                 [
-                vue.createElementVNode("div", {
-                  class: "mask",
-                  onClick:
-                    _cache[0] ||
-                    (_cache[0] = (...args) =>
-                      $options.close && $options.close(...args)),
-                }),
-                vue.createElementVNode("div", _hoisted_2$c, [
-                  vue.createElementVNode("div", _hoisted_3$9, [
-                    _cache[38] ||
-                      (_cache[38] = vue.createElementVNode(
-                        "div",
-                        { class: "title" },
-                        " 脚本设置 ",
-                        -1,
-                      )),
-                    vue.createVNode(
-                      _component_Icon,
-                      {
-                        icon: "ic:round-close",
-                        onClick: $options.close,
-                      },
-                      null,
-                      8,
-                      ["onClick"],
-                    ),
-                  ]),
-                  $options.isNew
-                    ? (vue.openBlock(),
-                      vue.createElementBlock("div", _hoisted_4$8, [
-                        vue.createElementVNode(
-                          "a",
-                          {
-                            onClick:
-                              _cache[1] ||
-                              (_cache[1] = (...args) =>
-                                $options.goPost && $options.goPost(...args)),
-                          },
-                          "New：手机App现已发布，支持楼中楼！PC脚本新增历史最热数据、imgur换源功能！点击查看详细介绍",
-                        ),
-                        _cache[39] ||
-                          (_cache[39] = vue.createElementVNode(
-                            "div",
-                            { class: "new" },
-                            null,
-                            -1,
-                          )),
-                      ]))
-                    : vue.createCommentVNode("", true),
-                  vue.createElementVNode("div", _hoisted_5$7, [
-                    vue.createElementVNode("div", _hoisted_6$7, [
-                      vue.createElementVNode("div", _hoisted_7$7, [
-                        vue.createElementVNode(
+                  vue.createElementVNode("div", {
+                    class: "mask",
+                    onClick:
+                      _cache[0] ||
+                      (_cache[0] = (...args) =>
+                        $options.close && $options.close(...args)),
+                  }),
+                  vue.createElementVNode("div", _hoisted_2$c, [
+                    vue.createElementVNode("div", _hoisted_3$9, [
+                      _cache[38] ||
+                        (_cache[38] = vue.createElementVNode(
                           "div",
-                          {
-                            class: vue.normalizeClass([
-                              "tab",
-                              $data.tabIndex === 0 && "active",
-                            ]),
-                            onClick:
-                              _cache[2] ||
-                              (_cache[2] = ($event) => ($data.tabIndex = 0)),
-                          },
-                          [
-                            vue.createVNode(_component_Icon, {
-                              icon: "weui:setting-outlined",
-                            }),
-                            _cache[40] ||
-                              (_cache[40] = vue.createElementVNode(
-                                "span",
-                                null,
-                                "列表",
-                                -1,
-                              )),
-                          ],
-                          2,
-                        ),
-                        vue.createElementVNode(
-                          "div",
-                          {
-                            class: vue.normalizeClass([
-                              "tab",
-                              $data.tabIndex === 1 && "active",
-                            ]),
-                            onClick:
-                              _cache[3] ||
-                              (_cache[3] = ($event) => ($data.tabIndex = 1)),
-                          },
-                          [
-                            vue.createVNode(_component_Icon, {
-                              icon: "stash:article-alt-light",
-                            }),
-                            _cache[41] ||
-                              (_cache[41] = vue.createElementVNode(
-                                "span",
-                                null,
-                                "主题",
-                                -1,
-                              )),
-                          ],
-                          2,
-                        ),
-                        vue.createElementVNode(
-                          "div",
-                          {
-                            class: vue.normalizeClass([
-                              "tab",
-                              $data.tabIndex === 2 && "active",
-                            ]),
-                            onClick:
-                              _cache[4] ||
-                              (_cache[4] = ($event) => ($data.tabIndex = 2)),
-                          },
-                          [
-                            vue.createVNode(_component_Icon, {
-                              icon: "fluent:more-circle-20-regular",
-                            }),
-                            _cache[42] ||
-                              (_cache[42] = vue.createElementVNode(
-                                "span",
-                                null,
-                                "其他",
-                                -1,
-                              )),
-                          ],
-                          2,
-                        ),
-                        vue.createElementVNode(
-                          "div",
-                          {
-                            class: vue.normalizeClass([
-                              "tab",
-                              $data.tabIndex === 3 && "active",
-                            ]),
-                            onClick:
-                              _cache[5] ||
-                              (_cache[5] = ($event) => ($data.tabIndex = 3)),
-                          },
-                          [
-                            vue.createVNode(_component_Icon, {
-                              icon: "ix:about",
-                            }),
-                            _cache[43] ||
-                              (_cache[43] = vue.createElementVNode(
-                                "span",
-                                null,
-                                "关于",
-                                -1,
-                              )),
-                          ],
-                          2,
-                        ),
-                        vue.createElementVNode(
-                          "div",
-                          {
-                            class: vue.normalizeClass([
-                              "tab",
-                              $data.tabIndex === 4 && "active",
-                            ]),
-                            onClick:
-                              _cache[6] ||
-                              (_cache[6] = ($event) => ($data.tabIndex = 4)),
-                          },
-                          [
-                            vue.createVNode(_component_Icon, {
-                              icon: "ix:about",
-                            }),
-                            _cache[44] ||
-                              (_cache[44] = vue.createElementVNode(
-                                "span",
-                                null,
-                                "插件",
-                                -1,
-                              )),
-                          ],
-                          2,
-                        ),
-                      ]),
-                      vue.createElementVNode("div", _hoisted_8$7, [
-                        _cache[45] ||
-                          (_cache[45] = vue.createElementVNode(
-                            "div",
-                            { class: "tip" },
-                            " 如果可以的话欢迎点个star支持一下，感谢原作者 ",
-                            -1,
-                          )),
-                        vue.createElementVNode("div", _hoisted_9$7, [
+                          { class: "title" },
+                          " 脚本设置 ",
+                          -1,
+                        )),
+                      vue.createVNode(
+                        _component_Icon,
+                        {
+                          icon: "ic:round-close",
+                          onClick: $options.close,
+                        },
+                        null,
+                        8,
+                        ["onClick"],
+                      ),
+                    ]),
+                    $options.isNew
+                      ? (vue.openBlock(),
+                        vue.createElementBlock("div", _hoisted_4$8, [
                           vue.createElementVNode(
                             "a",
                             {
-                              href: $options.DefaultVal.git || undefined,
-                              target: "_blank",
+                              onClick:
+                                _cache[1] ||
+                                (_cache[1] = (...args) =>
+                                  $options.goPost && $options.goPost(...args)),
+                            },
+                            "New：手机App现已发布，支持楼中楼！PC脚本新增历史最热数据、imgur换源功能！点击查看详细介绍",
+                          ),
+                          _cache[39] ||
+                            (_cache[39] = vue.createElementVNode(
+                              "div",
+                              { class: "new" },
+                              null,
+                              -1,
+                            )),
+                        ]))
+                      : vue.createCommentVNode("", true),
+                    vue.createElementVNode("div", _hoisted_5$7, [
+                      vue.createElementVNode("div", _hoisted_6$7, [
+                        vue.createElementVNode("div", _hoisted_7$7, [
+                          vue.createElementVNode(
+                            "div",
+                            {
+                              class: vue.normalizeClass([
+                                "tab",
+                                $data.tabIndex === 0 && "active",
+                              ]),
+                              onClick:
+                                _cache[2] ||
+                                (_cache[2] = ($event) => ($data.tabIndex = 0)),
                             },
                             [
                               vue.createVNode(_component_Icon, {
-                                icon: "mdi:github",
+                                icon: "weui:setting-outlined",
                               }),
+                              _cache[40] ||
+                                (_cache[40] = vue.createElementVNode(
+                                  "span",
+                                  null,
+                                  "列表",
+                                  -1,
+                                )),
                             ],
-                            8,
-                            _hoisted_10$7,
+                            2,
                           ),
                           vue.createElementVNode(
-                            "a",
+                            "div",
                             {
-                              href: $options.DefaultVal.homeUrl || undefined,
-                              target: "_blank",
+                              class: vue.normalizeClass([
+                                "tab",
+                                $data.tabIndex === 1 && "active",
+                              ]),
+                              onClick:
+                                _cache[3] ||
+                                (_cache[3] = ($event) => ($data.tabIndex = 1)),
                             },
                             [
                               vue.createVNode(_component_Icon, {
-                                icon: "iconamoon:home-light",
+                                icon: "stash:article-alt-light",
                               }),
+                              _cache[41] ||
+                                (_cache[41] = vue.createElementVNode(
+                                  "span",
+                                  null,
+                                  "主题",
+                                  -1,
+                                )),
                             ],
-                            8,
-                            _hoisted_11$6,
+                            2,
+                          ),
+                          vue.createElementVNode(
+                            "div",
+                            {
+                              class: vue.normalizeClass([
+                                "tab",
+                                $data.tabIndex === 2 && "active",
+                              ]),
+                              onClick:
+                                _cache[4] ||
+                                (_cache[4] = ($event) => ($data.tabIndex = 2)),
+                            },
+                            [
+                              vue.createVNode(_component_Icon, {
+                                icon: "fluent:more-circle-20-regular",
+                              }),
+                              _cache[42] ||
+                                (_cache[42] = vue.createElementVNode(
+                                  "span",
+                                  null,
+                                  "其他",
+                                  -1,
+                                )),
+                            ],
+                            2,
+                          ),
+                          vue.createElementVNode(
+                            "div",
+                            {
+                              class: vue.normalizeClass([
+                                "tab",
+                                $data.tabIndex === 3 && "active",
+                              ]),
+                              onClick:
+                                _cache[5] ||
+                                (_cache[5] = ($event) => ($data.tabIndex = 3)),
+                            },
+                            [
+                              vue.createVNode(_component_Icon, {
+                                icon: "ix:about",
+                              }),
+                              _cache[43] ||
+                                (_cache[43] = vue.createElementVNode(
+                                  "span",
+                                  null,
+                                  "关于",
+                                  -1,
+                                )),
+                            ],
+                            2,
+                          ),
+                          vue.createElementVNode(
+                            "div",
+                            {
+                              class: vue.normalizeClass([
+                                "tab",
+                                $data.tabIndex === 4 && "active",
+                              ]),
+                              onClick:
+                                _cache[6] ||
+                                (_cache[6] = ($event) => ($data.tabIndex = 4)),
+                            },
+                            [
+                              vue.createVNode(_component_Icon, {
+                                icon: "ix:about",
+                              }),
+                              _cache[44] ||
+                                (_cache[44] = vue.createElementVNode(
+                                  "span",
+                                  null,
+                                  "插件",
+                                  -1,
+                                )),
+                            ],
+                            2,
                           ),
                         ]),
+                        vue.createElementVNode("div", _hoisted_8$7, [
+                          _cache[45] ||
+                            (_cache[45] = vue.createElementVNode(
+                              "div",
+                              { class: "tip" },
+                              " 如果可以的话欢迎点个star支持一下，感谢原作者 ",
+                              -1,
+                            )),
+                          vue.createElementVNode("div", _hoisted_9$7, [
+                            vue.createElementVNode(
+                              "a",
+                              {
+                                href: $options.DefaultVal.git || undefined,
+                                target: "_blank",
+                              },
+                              [
+                                vue.createVNode(_component_Icon, {
+                                  icon: "mdi:github",
+                                }),
+                              ],
+                              8,
+                              _hoisted_10$7,
+                            ),
+                            vue.createElementVNode(
+                              "a",
+                              {
+                                href: $options.DefaultVal.homeUrl || undefined,
+                                target: "_blank",
+                              },
+                              [
+                                vue.createVNode(_component_Icon, {
+                                  icon: "iconamoon:home-light",
+                                }),
+                              ],
+                              8,
+                              _hoisted_11$6,
+                            ),
+                          ]),
+                        ]),
                       ]),
-                    ]),
-                    vue.createElementVNode("div", _hoisted_12$5, [
-                      vue.createElementVNode("div", _hoisted_13$5, [
-                        $data.tabIndex === 0
-                          ? (vue.openBlock(),
-                            vue.createElementBlock("div", _hoisted_14$4, [
-                              $options.renderThemeSelector(),
-                              vue.createElementVNode("div", _hoisted_15$3, [
-                                vue.createElementVNode("div", _hoisted_16$3, [
-                                  _cache[46] ||
-                                    (_cache[46] = vue.createElementVNode(
-                                      "label",
-                                      { class: "item-title" },
-                                      "列表展示方式",
-                                      -1,
-                                    )),
-                                  vue.createElementVNode("div", _hoisted_17$2, [
+                      vue.createElementVNode("div", _hoisted_12$5, [
+                        vue.createElementVNode("div", _hoisted_13$5, [
+                          $data.tabIndex === 0
+                            ? (vue.openBlock(),
+                              vue.createElementBlock("div", _hoisted_14$4, [
+                                $options.renderThemeSelector(),
+                                vue.createElementVNode("div", _hoisted_15$3, [
+                                  vue.createElementVNode("div", _hoisted_16$3, [
+                                    _cache[46] ||
+                                      (_cache[46] = vue.createElementVNode(
+                                        "label",
+                                        { class: "item-title" },
+                                        "列表展示方式",
+                                        -1,
+                                      )),
                                     vue.createElementVNode(
                                       "div",
-                                      _hoisted_18$2,
+                                      _hoisted_17$2,
                                       [
                                         vue.createElementVNode(
                                           "div",
-                                          {
-                                            class: vue.normalizeClass([
-                                              "radio",
-                                              $data.config.viewType === "simple"
-                                                ? "active"
-                                                : "",
-                                            ]),
-                                            onClick:
-                                              _cache[7] ||
-                                              (_cache[7] = ($event) =>
-                                                ($data.config.viewType =
-                                                  "simple")),
-                                          },
-                                          "简洁 ",
-                                          2,
-                                        ),
-                                        vue.createElementVNode(
-                                          "div",
-                                          {
-                                            class: vue.normalizeClass([
-                                              "radio",
-                                              $data.config.viewType === "table"
-                                                ? "active"
-                                                : "",
-                                            ]),
-                                            onClick:
-                                              _cache[8] ||
-                                              (_cache[8] = ($event) =>
-                                                ($data.config.viewType =
-                                                  "table")),
-                                          },
-                                          "表格 ",
-                                          2,
-                                        ),
-                                        vue.createElementVNode(
-                                          "div",
-                                          {
-                                            class: vue.normalizeClass([
-                                              "radio",
-                                              $data.config.viewType === "card"
-                                                ? "active"
-                                                : "",
-                                            ]),
-                                            onClick:
-                                              _cache[9] ||
-                                              (_cache[9] = ($event) =>
-                                                ($data.showNotice = true)),
-                                          },
-                                          "卡片 ",
-                                          2,
+                                          _hoisted_18$2,
+                                          [
+                                            vue.createElementVNode(
+                                              "div",
+                                              {
+                                                class: vue.normalizeClass([
+                                                  "radio",
+                                                  $data.config.viewType ===
+                                                  "simple"
+                                                    ? "active"
+                                                    : "",
+                                                ]),
+                                                onClick:
+                                                  _cache[7] ||
+                                                  (_cache[7] = ($event) =>
+                                                    ($data.config.viewType =
+                                                      "simple")),
+                                              },
+                                              "简洁 ",
+                                              2,
+                                            ),
+                                            vue.createElementVNode(
+                                              "div",
+                                              {
+                                                class: vue.normalizeClass([
+                                                  "radio",
+                                                  $data.config.viewType ===
+                                                  "table"
+                                                    ? "active"
+                                                    : "",
+                                                ]),
+                                                onClick:
+                                                  _cache[8] ||
+                                                  (_cache[8] = ($event) =>
+                                                    ($data.config.viewType =
+                                                      "table")),
+                                              },
+                                              "表格 ",
+                                              2,
+                                            ),
+                                            vue.createElementVNode(
+                                              "div",
+                                              {
+                                                class: vue.normalizeClass([
+                                                  "radio",
+                                                  $data.config.viewType ===
+                                                  "card"
+                                                    ? "active"
+                                                    : "",
+                                                ]),
+                                                onClick:
+                                                  _cache[9] ||
+                                                  (_cache[9] = ($event) =>
+                                                    ($data.showNotice = true)),
+                                              },
+                                              "卡片 ",
+                                              2,
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
                                   ]),
-                                ]),
-                                _cache[47] ||
-                                  (_cache[47] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc danger" },
-                                    " 提示：此项需要刷新页面才能生效 ",
-                                    -1,
-                                  )),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_19$2, [
-                                vue.createElementVNode("div", _hoisted_20$2, [
-                                  _cache[48] ||
-                                    (_cache[48] = vue.createElementVNode(
-                                      "label",
-                                      { class: "item-title" },
-                                      "主题弹框显示",
+                                  _cache[47] ||
+                                    (_cache[47] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc danger" },
+                                      " 提示：此项需要刷新页面才能生效 ",
                                       -1,
                                     )),
-                                  vue.createElementVNode("div", _hoisted_21$1, [
+                                ]),
+                                vue.createElementVNode("div", _hoisted_19$2, [
+                                  vue.createElementVNode("div", _hoisted_20$2, [
+                                    _cache[48] ||
+                                      (_cache[48] = vue.createElementVNode(
+                                        "label",
+                                        { class: "item-title" },
+                                        "主题弹框显示",
+                                        -1,
+                                      )),
+                                    vue.createElementVNode(
+                                      "div",
+                                      _hoisted_21$1,
+                                      [
+                                        vue.createVNode(
+                                          _component_BaseSwitch,
+                                          {
+                                            modelValue:
+                                              $data.config
+                                                .clickPostItemOpenDetail,
+                                            "onUpdate:modelValue":
+                                              _cache[10] ||
+                                              (_cache[10] = ($event) =>
+                                                ($data.config.clickPostItemOpenDetail =
+                                                  $event)),
+                                          },
+                                          null,
+                                          8,
+                                          ["modelValue"],
+                                        ),
+                                      ],
+                                    ),
+                                  ]),
+                                  _cache[49] ||
+                                    (_cache[49] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc" },
+                                      [
+                                        vue.createTextVNode(
+                                          " 开启此选项后，主题会",
+                                        ),
+                                        vue.createElementVNode(
+                                          "span",
+                                          { class: "danger" },
+                                          "始终",
+                                        ),
+                                        vue.createTextVNode(
+                                          "以弹框的方式显示。优先级大于“新标签页打开链接” ",
+                                        ),
+                                      ],
+                                      -1,
+                                    )),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_22$1, [
+                                  vue.createElementVNode("div", _hoisted_23$1, [
+                                    vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "外链新标签页打开",
+                                    ),
+                                    vue.createElementVNode(
+                                      "div",
+                                      _hoisted_24$1,
+                                      [
+                                        vue.createVNode(
+                                          _component_BaseSwitch,
+                                          {
+                                            modelValue:
+                                              $data.config
+                                                .openExternalLinkInNewTab,
+                                            "onUpdate:modelValue": ($event) =>
+                                              ($data.config.openExternalLinkInNewTab =
+                                                $event),
+                                          },
+                                          null,
+                                          8,
+                                          ["modelValue"],
+                                        ),
+                                      ],
+                                    ),
+                                  ]),
+                                  vue.createElementVNode(
+                                    "div",
+                                    { class: "desc" },
+                                    " 网页上的外部链接（非本站与镜像站）默认在新标签页中打开 ",
+                                  ),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_22$1, [
+                                  vue.createElementVNode("div", _hoisted_23$1, [
+                                    vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "隐私模式（防窥）",
+                                    ),
+                                    vue.createElementVNode(
+                                      "div",
+                                      _hoisted_24$1,
+                                      [
+                                        vue.createVNode(
+                                          _component_BaseSwitch,
+                                          {
+                                            modelValue:
+                                              $data.config.privacyMode,
+                                            "onUpdate:modelValue": ($event) =>
+                                              ($data.config.privacyMode =
+                                                $event),
+                                          },
+                                          null,
+                                          8,
+                                          ["modelValue"],
+                                        ),
+                                      ],
+                                    ),
+                                  ]),
+                                  vue.createElementVNode(
+                                    "div",
+                                    { class: "desc" },
+                                    " 模糊右侧栏个人卡片与顶部用户名等敏感信息，鼠标悬停时自动清晰展示 ",
+                                  ),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_22$1, [
+                                  vue.createElementVNode("div", _hoisted_23$1, [
+                                    _cache[50] ||
+                                      (_cache[50] = vue.createElementVNode(
+                                        "label",
+                                        { class: "item-title" },
+                                        "新标签页打开链接",
+                                        -1,
+                                      )),
+                                    vue.createElementVNode(
+                                      "div",
+                                      _hoisted_24$1,
+                                      [
+                                        vue.createVNode(
+                                          _component_BaseSwitch,
+                                          {
+                                            modelValue: $data.config.newTabOpen,
+                                            "onUpdate:modelValue":
+                                              _cache[11] ||
+                                              (_cache[11] = ($event) =>
+                                                ($data.config.newTabOpen =
+                                                  $event)),
+                                          },
+                                          null,
+                                          8,
+                                          ["modelValue"],
+                                        ),
+                                      ],
+                                    ),
+                                  ]),
+                                  _cache[51] ||
+                                    (_cache[51] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc" },
+                                      " 网页上所有链接通过新标签页打开 ",
+                                      -1,
+                                    )),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_25$1, [
+                                  _cache[52] ||
+                                    (_cache[52] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "打开新标签页时立即切换过去",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_26$1, [
                                     vue.createVNode(
                                       _component_BaseSwitch,
                                       {
                                         modelValue:
-                                          $data.config.clickPostItemOpenDetail,
+                                          $data.config.newTabOpenActive,
                                         "onUpdate:modelValue":
-                                          _cache[10] ||
-                                          (_cache[10] = ($event) =>
-                                            ($data.config.clickPostItemOpenDetail =
+                                          _cache[12] ||
+                                          (_cache[12] = ($event) =>
+                                            ($data.config.newTabOpenActive =
                                               $event)),
                                       },
                                       null,
@@ -4839,40 +5001,168 @@
                                     ),
                                   ]),
                                 ]),
-                                _cache[49] ||
-                                  (_cache[49] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc" },
-                                    [
-                                      vue.createTextVNode(
-                                        " 开启此选项后，主题会",
-                                      ),
-                                      vue.createElementVNode(
-                                        "span",
-                                        { class: "danger" },
-                                        "始终",
-                                      ),
-                                      vue.createTextVNode(
-                                        "以弹框的方式显示。优先级大于“新标签页打开链接” ",
-                                      ),
-                                    ],
-                                    -1,
-                                  )),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_22$1, [
-                                vue.createElementVNode("div", _hoisted_23$1, [
-                                  vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "外链新标签页打开",
-                                  ),
-                                  vue.createElementVNode("div", _hoisted_24$1, [
+                              ]))
+                            : vue.createCommentVNode("", true),
+                          $data.tabIndex === 1
+                            ? (vue.openBlock(),
+                              vue.createElementBlock("div", _hoisted_27$1, [
+                                $options.renderThemeSelector(),
+                                vue.createElementVNode("div", _hoisted_28$1, [
+                                  _cache[53] ||
+                                    (_cache[53] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "回复类型",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_29$1, [
+                                    vue.createVNode(
+                                      _component_BaseSelect,
+                                      {
+                                        "display-type":
+                                          $data.config.commentDisplayType,
+                                        "onUpdate:displayType":
+                                          _cache[13] ||
+                                          (_cache[13] = ($event) =>
+                                            ($data.config.commentDisplayType =
+                                              $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["display-type"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_30$1, [
+                                  _cache[54] ||
+                                    (_cache[54] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "详情页中显示“回复类型”",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_31$1, [
                                     vue.createVNode(
                                       _component_BaseSwitch,
                                       {
-                                        modelValue: $data.config.openExternalLinkInNewTab,
-                                        "onUpdate:modelValue": ($event) =>
-                                          ($data.config.openExternalLinkInNewTab = $event),
+                                        modelValue: $data.config.showToolbar,
+                                        "onUpdate:modelValue":
+                                          _cache[14] ||
+                                          (_cache[14] = ($event) =>
+                                            ($data.config.showToolbar =
+                                              $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_32$1, [
+                                  _cache[55] ||
+                                    (_cache[55] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "替换Imgur源",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_33$1, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue: $data.config.replaceImgur,
+                                        "onUpdate:modelValue":
+                                          _cache[15] ||
+                                          (_cache[15] = ($event) =>
+                                            ($data.config.replaceImgur =
+                                              $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_34$1, [
+                                  vue.createElementVNode("div", _hoisted_35, [
+                                    _cache[56] ||
+                                      (_cache[56] = vue.createElementVNode(
+                                        "label",
+                                        { class: "item-title" },
+                                        "单独打开主题时默认显示楼中楼",
+                                        -1,
+                                      )),
+                                    vue.createElementVNode("div", _hoisted_36, [
+                                      vue.createVNode(
+                                        _component_BaseSwitch,
+                                        {
+                                          modelValue:
+                                            $data.config.autoOpenDetail,
+                                          "onUpdate:modelValue":
+                                            _cache[16] ||
+                                            (_cache[16] = ($event) =>
+                                              ($data.config.autoOpenDetail =
+                                                $event)),
+                                        },
+                                        null,
+                                        8,
+                                        ["modelValue"],
+                                      ),
+                                    ]),
+                                  ]),
+                                  _cache[57] ||
+                                    (_cache[57] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc" },
+                                      " 单独打开这种地址 https://v2ex.com/t/xxxx 时，是否默认显示楼中楼 ",
+                                      -1,
+                                    )),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_37, [
+                                  _cache[58] ||
+                                    (_cache[58] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "点击左右两侧透明处关闭主题详情弹框",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_38, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue:
+                                          $data.config.closePostDetailBySpace,
+                                        "onUpdate:modelValue":
+                                          _cache[17] ||
+                                          (_cache[17] = ($event) =>
+                                            ($data.config.closePostDetailBySpace =
+                                              $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_39, [
+                                  _cache[59] ||
+                                    (_cache[59] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "正文超长自动折叠",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_40, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue:
+                                          $data.config.contentAutoCollapse,
+                                        "onUpdate:modelValue":
+                                          _cache[18] ||
+                                          (_cache[18] = ($event) =>
+                                            ($data.config.contentAutoCollapse =
+                                              $event)),
                                       },
                                       null,
                                       8,
@@ -4882,286 +5172,64 @@
                                 ]),
                                 vue.createElementVNode(
                                   "div",
-                                  { class: "desc" },
-                                  " 网页上的外部链接（非本站与镜像站）默认在新标签页中打开 ",
-                                ),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_22$1, [
-                                vue.createElementVNode("div", _hoisted_23$1, [
-                                  vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "隐私模式（防窥）",
-                                  ),
-                                  vue.createElementVNode("div", _hoisted_24$1, [
-                                    vue.createVNode(
-                                      _component_BaseSwitch,
-                                      {
-                                        modelValue: $data.config.privacyMode,
-                                        "onUpdate:modelValue": ($event) =>
-                                          ($data.config.privacyMode = $event),
-                                      },
-                                      null,
-                                      8,
-                                      ["modelValue"],
-                                    ),
-                                  ]),
-                                ]),
-                                vue.createElementVNode(
-                                  "div",
-                                  { class: "desc" },
-                                  " 模糊右侧栏个人卡片与顶部用户名等敏感信息，鼠标悬停时自动清晰展示 ",
-                                ),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_22$1, [
-                                vue.createElementVNode("div", _hoisted_23$1, [
-                                  _cache[50] ||
-                                    (_cache[50] = vue.createElementVNode(
+                                  { class: "row border" },
+                                  [
+                                    vue.createElementVNode(
                                       "label",
                                       { class: "item-title" },
-                                      "新标签页打开链接",
+                                      "长内容折叠阈值（px）",
                                       -1,
-                                    )),
-                                  vue.createElementVNode("div", _hoisted_24$1, [
-                                    vue.createVNode(
-                                      _component_BaseSwitch,
-                                      {
-                                        modelValue: $data.config.newTabOpen,
-                                        "onUpdate:modelValue":
-                                          _cache[11] ||
-                                          (_cache[11] = ($event) =>
-                                            ($data.config.newTabOpen = $event)),
-                                      },
-                                      null,
-                                      8,
-                                      ["modelValue"],
                                     ),
-                                  ]),
-                                ]),
-                                _cache[51] ||
-                                  (_cache[51] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc" },
-                                    " 网页上所有链接通过新标签页打开 ",
-                                    -1,
-                                  )),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_25$1, [
-                                _cache[52] ||
-                                  (_cache[52] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "打开新标签页时立即切换过去",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_26$1, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue: $data.config.newTabOpenActive,
-                                      "onUpdate:modelValue":
-                                        _cache[12] ||
-                                        (_cache[12] = ($event) =>
-                                          ($data.config.newTabOpenActive =
-                                            $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                            ]))
-                          : vue.createCommentVNode("", true),
-                        $data.tabIndex === 1
-                          ? (vue.openBlock(),
-                            vue.createElementBlock("div", _hoisted_27$1, [
-                              $options.renderThemeSelector(),
-                              vue.createElementVNode("div", _hoisted_28$1, [
-                                _cache[53] ||
-                                  (_cache[53] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "回复类型",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_29$1, [
-                                  vue.createVNode(
-                                    _component_BaseSelect,
-                                    {
-                                      "display-type":
-                                        $data.config.commentDisplayType,
-                                      "onUpdate:displayType":
-                                        _cache[13] ||
-                                        (_cache[13] = ($event) =>
-                                          ($data.config.commentDisplayType =
-                                            $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["display-type"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_30$1, [
-                                _cache[54] ||
-                                  (_cache[54] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "详情页中显示“回复类型”",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_31$1, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue: $data.config.showToolbar,
-                                      "onUpdate:modelValue":
-                                        _cache[14] ||
-                                        (_cache[14] = ($event) =>
-                                          ($data.config.showToolbar = $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_32$1, [
-                                _cache[55] ||
-                                  (_cache[55] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "替换Imgur源",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_33$1, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue: $data.config.replaceImgur,
-                                      "onUpdate:modelValue":
-                                        _cache[15] ||
-                                        (_cache[15] = ($event) =>
-                                          ($data.config.replaceImgur = $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_34$1, [
-                                vue.createElementVNode("div", _hoisted_35, [
-                                  _cache[56] ||
-                                    (_cache[56] = vue.createElementVNode(
-                                      "label",
-                                      { class: "item-title" },
-                                      "单独打开主题时默认显示楼中楼",
-                                      -1,
-                                    )),
-                                  vue.createElementVNode("div", _hoisted_36, [
-                                    vue.createVNode(
-                                      _component_BaseSwitch,
-                                      {
-                                        modelValue: $data.config.autoOpenDetail,
-                                        "onUpdate:modelValue":
-                                          _cache[16] ||
-                                          (_cache[16] = ($event) =>
-                                            ($data.config.autoOpenDetail =
-                                              $event)),
-                                      },
-                                      null,
-                                      8,
-                                      ["modelValue"],
+                                    vue.createElementVNode(
+                                      "div",
+                                      { class: "wrapper" },
+                                      [
+                                        vue.withDirectives(
+                                          vue.createElementVNode(
+                                            "input",
+                                            {
+                                              type: "number",
+                                              min: "200",
+                                              max: "5000",
+                                              step: "100",
+                                              "onUpdate:modelValue": ($event) =>
+                                                ($data.config.collapseHeight =
+                                                  $event),
+                                            },
+                                            null,
+                                            512,
+                                          ),
+                                          [
+                                            [
+                                              vue.vModelText,
+                                              $data.config.collapseHeight,
+                                            ],
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                  ]),
-                                ]),
-                                _cache[57] ||
-                                  (_cache[57] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc" },
-                                    " 单独打开这种地址 https://v2ex.com/t/xxxx 时，是否默认显示楼中楼 ",
-                                    -1,
-                                  )),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_37, [
-                                _cache[58] ||
-                                  (_cache[58] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "点击左右两侧透明处关闭主题详情弹框",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_38, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue:
-                                        $data.config.closePostDetailBySpace,
-                                      "onUpdate:modelValue":
-                                        _cache[17] ||
-                                        (_cache[17] = ($event) =>
-                                          ($data.config.closePostDetailBySpace =
-                                            $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_39, [
-                                _cache[59] ||
-                                  (_cache[59] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "正文超长自动折叠",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_40, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue:
-                                        $data.config.contentAutoCollapse,
-                                      "onUpdate:modelValue":
-                                        _cache[18] ||
-                                        (_cache[18] = ($event) =>
-                                          ($data.config.contentAutoCollapse =
-                                            $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode(
-                                "div",
-                                { class: "row border" },
-                                [
-                                  vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "长内容折叠阈值（px）",
-                                    -1,
-                                  ),
-                                  vue.createElementVNode(
-                                    "div",
-                                    { class: "wrapper" },
-                                    [
+                                  ],
+                                ),
+                                vue.createElementVNode("div", _hoisted_41, [
+                                  vue.createElementVNode("div", _hoisted_42, [
+                                    _cache[60] ||
+                                      (_cache[60] = vue.createElementVNode(
+                                        "label",
+                                        { class: "item-title" },
+                                        "主题宽度",
+                                        -1,
+                                      )),
+                                    vue.createElementVNode("div", _hoisted_43, [
                                       vue.withDirectives(
                                         vue.createElementVNode(
                                           "input",
                                           {
-                                            type: "number",
-                                            min: "200",
-                                            max: "5000",
-                                            step: "100",
-                                            "onUpdate:modelValue": ($event) =>
-                                              ($data.config.collapseHeight =
-                                                $event),
+                                            type: "text",
+                                            "onUpdate:modelValue":
+                                              _cache[19] ||
+                                              (_cache[19] = ($event) =>
+                                                ($data.config.postWidth =
+                                                  $event)),
                                           },
                                           null,
                                           512,
@@ -5169,32 +5237,768 @@
                                         [
                                           [
                                             vue.vModelText,
-                                            $data.config.collapseHeight,
+                                            $data.config.postWidth,
                                           ],
                                         ],
                                       ),
+                                    ]),
+                                  ]),
+                                  _cache[61] ||
+                                    (_cache[61] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc" },
+                                      [
+                                        vue.createTextVNode(
+                                          " 未设定此值时，则默认宽度为77rem。接受合法的width值： ",
+                                        ),
+                                        vue.createElementVNode(
+                                          "a",
+                                          {
+                                            style: {
+                                              color: "#40a9ff",
+                                              "text-decoration": "underline",
+                                            },
+                                            href: "https://vue3js.cn/interview/css/em_px_rem_vh_vw.html#%E4%BA%8C%E3%80%81%E5%8D%95%E4%BD%8D",
+                                            target: "_blank",
+                                          },
+                                          "rem、px、vw、vh(点此查看)",
+                                        ),
+                                        vue.createTextVNode(
+                                          "。 vw代表屏幕百分比，如想要屏幕的66%，请填写66vw ",
+                                        ),
+                                      ],
+                                      -1,
+                                    )),
+                                  _cache[62] ||
+                                    (_cache[62] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc" },
+                                      " 提示：此项设置以后，单独打开详情页时会出现主题突然变宽（窄）的问题，暂时无解 ",
+                                      -1,
+                                    )),
+                                  _cache[63] ||
+                                    (_cache[63] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc danger" },
+                                      " 提示：此项需要刷新页面才能生效 ",
+                                      -1,
+                                    )),
+                                ]),
+                                _cache[65] ||
+                                  (_cache[65] = vue.createElementVNode(
+                                    "div",
+                                    { class: "row" },
+                                    [
+                                      vue.createElementVNode(
+                                        "label",
+                                        { class: "main-title" },
+                                        "高赞回复",
+                                      ),
                                     ],
+                                    -1,
+                                  )),
+                                vue.createElementVNode("div", _hoisted_44, [
+                                  _cache[64] ||
+                                    (_cache[64] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "显示高赞回复",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_45, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue: $data.config.showTopReply,
+                                        "onUpdate:modelValue":
+                                          _cache[20] ||
+                                          (_cache[20] = ($event) =>
+                                            ($data.config.showTopReply =
+                                              $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_46, [
+                                  vue.createElementVNode(
+                                    "label",
+                                    _hoisted_47,
+                                    "最多显示" +
+                                      vue.toDisplayString(
+                                        $data.config.topReplyCount,
+                                      ) +
+                                      "个高赞回复",
+                                    1,
                                   ),
-                                ],
-                              ),
-                              vue.createElementVNode("div", _hoisted_41, [
-                                vue.createElementVNode("div", _hoisted_42, [
-                                  _cache[60] ||
-                                    (_cache[60] = vue.createElementVNode(
+                                  vue.createElementVNode("div", _hoisted_48, [
+                                    vue.withDirectives(
+                                      vue.createElementVNode(
+                                        "input",
+                                        {
+                                          type: "number",
+                                          min: "1",
+                                          "onUpdate:modelValue":
+                                            _cache[21] ||
+                                            (_cache[21] = ($event) =>
+                                              ($data.config.topReplyCount =
+                                                $event)),
+                                        },
+                                        null,
+                                        512,
+                                      ),
+                                      [
+                                        [
+                                          vue.vModelText,
+                                          $data.config.topReplyCount,
+                                        ],
+                                      ],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_49, [
+                                  vue.createElementVNode(
+                                    "label",
+                                    _hoisted_50,
+                                    "最少需要" +
+                                      vue.toDisplayString(
+                                        $data.config.topReplyLoveMinCount,
+                                      ) +
+                                      "个赞才能被判定为高赞",
+                                    1,
+                                  ),
+                                  vue.createElementVNode("div", _hoisted_51, [
+                                    vue.withDirectives(
+                                      vue.createElementVNode(
+                                        "input",
+                                        {
+                                          type: "number",
+                                          min: "1",
+                                          "onUpdate:modelValue":
+                                            _cache[22] ||
+                                            (_cache[22] = ($event) =>
+                                              ($data.config.topReplyLoveMinCount =
+                                                $event)),
+                                        },
+                                        null,
+                                        512,
+                                      ),
+                                      [
+                                        [
+                                          vue.vModelText,
+                                          $data.config.topReplyLoveMinCount,
+                                        ],
+                                      ],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode(
+                                  "div",
+                                  { class: "row border" },
+                                  [
+                                    vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "高赞统计最多抓取页数",
+                                      -1,
+                                    ),
+                                    vue.createElementVNode(
+                                      "div",
+                                      { class: "wrapper" },
+                                      [
+                                        vue.withDirectives(
+                                          vue.createElementVNode(
+                                            "input",
+                                            {
+                                              type: "number",
+                                              min: "1",
+                                              max: "100",
+                                              "onUpdate:modelValue": ($event) =>
+                                                ($data.config.topReplyMaxPages =
+                                                  $event),
+                                            },
+                                            null,
+                                            512,
+                                          ),
+                                          [
+                                            [
+                                              vue.vModelText,
+                                              $data.config.topReplyMaxPages,
+                                            ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ]))
+                            : vue.createCommentVNode("", true),
+                          $data.tabIndex === 2
+                            ? (vue.openBlock(),
+                              vue.createElementBlock("div", _hoisted_52, [
+                                _cache[84] ||
+                                  (_cache[84] = vue.createElementVNode(
+                                    "div",
+                                    { class: "row" },
+                                    [
+                                      vue.createElementVNode(
+                                        "label",
+                                        { class: "main-title" },
+                                        "收藏列表",
+                                      ),
+                                    ],
+                                    -1,
+                                  )),
+                                vue.createElementVNode("div", _hoisted_53, [
+                                  vue.createElementVNode("div", _hoisted_54, [
+                                    vue.createElementVNode("div", null, [
+                                      vue.createVNode(
+                                        _component_BaseButton,
+                                        {
+                                          onClick: $options.exportCollectList,
+                                          loading: $data.exportLoading,
+                                        },
+                                        {
+                                          default: vue.withCtx(() => [
+                                            ...(_cache[66] ||
+                                              (_cache[66] = [
+                                                vue.createTextVNode("导出", -1),
+                                              ])),
+                                          ]),
+                                          _: 1,
+                                        },
+                                        8,
+                                        ["onClick", "loading"],
+                                      ),
+                                      _cache[68] ||
+                                        (_cache[68] = vue.createElementVNode(
+                                          "span",
+                                          null,
+                                          "   ",
+                                          -1,
+                                        )),
+                                      vue.createElementVNode(
+                                        "div",
+                                        _hoisted_55,
+                                        [
+                                          vue.createVNode(
+                                            _component_BaseButton,
+                                            { loading: $data.importLoading },
+                                            {
+                                              default: vue.withCtx(() => [
+                                                ...(_cache[67] ||
+                                                  (_cache[67] = [
+                                                    vue.createTextVNode(
+                                                      "导入，并收藏",
+                                                      -1,
+                                                    ),
+                                                  ])),
+                                              ]),
+                                              _: 1,
+                                            },
+                                            8,
+                                            ["loading"],
+                                          ),
+                                          $data.showInput
+                                            ? (vue.openBlock(),
+                                              vue.createElementBlock(
+                                                "input",
+                                                {
+                                                  key: 0,
+                                                  type: "file",
+                                                  style: {
+                                                    position: "absolute",
+                                                    width: "100%",
+                                                    height: "100px",
+                                                    opacity: "0",
+                                                  },
+                                                  onChange:
+                                                    _cache[23] ||
+                                                    (_cache[23] = (...args) =>
+                                                      $options.importCollectList &&
+                                                      $options.importCollectList(
+                                                        ...args,
+                                                      )),
+                                                },
+                                                null,
+                                                32,
+                                              ))
+                                            : vue.createCommentVNode("", true),
+                                        ],
+                                      ),
+                                      $data.importLoading
+                                        ? (vue.openBlock(),
+                                          vue.createElementBlock(
+                                            "div",
+                                            _hoisted_56,
+                                            " 导入中：" +
+                                              vue.toDisplayString($data.index) +
+                                              "/" +
+                                              vue.toDisplayString($data.total) +
+                                              " ，大约需要" +
+                                              vue.toDisplayString(
+                                                $data.endTime,
+                                              ) +
+                                              "分钟，导入完成前请勿关闭和刷新本页面 ",
+                                            1,
+                                          ))
+                                        : vue.createCommentVNode("", true),
+                                      $data.importOk
+                                        ? (vue.openBlock(),
+                                          vue.createElementBlock(
+                                            "div",
+                                            _hoisted_57,
+                                            " 导入完成 ",
+                                          ))
+                                        : vue.createCommentVNode("", true),
+                                    ]),
+                                  ]),
+                                  _cache[69] ||
+                                    (_cache[69] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc" },
+                                      " 默认导出为 json 文件，如需其他格式，请使用 ChatGpt/Deepseek 转换 ",
+                                      -1,
+                                    )),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_58, [
+                                  _cache[70] ||
+                                    (_cache[70] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "收藏时提醒添加到书签",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_59, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue:
+                                          $data.config.collectBrowserNotice,
+                                        "onUpdate:modelValue":
+                                          _cache[24] ||
+                                          (_cache[24] = ($event) =>
+                                            ($data.config.collectBrowserNotice =
+                                              $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                _cache[85] ||
+                                  (_cache[85] = vue.createElementVNode(
+                                    "div",
+                                    { class: "desc" },
+                                    " 解释：V站帐号一旦被封禁，则无法登录，无法查看账号收藏了 ",
+                                    -1,
+                                  )),
+                                _cache[86] ||
+                                  (_cache[86] = vue.createElementVNode(
+                                    "div",
+                                    { class: "row border" },
+                                    [
+                                      vue.createElementVNode(
+                                        "label",
+                                        { class: "main-title" },
+                                        "其他",
+                                      ),
+                                    ],
+                                    -1,
+                                  )),
+                                vue.createElementVNode("div", _hoisted_60, [
+                                  _cache[71] ||
+                                    (_cache[71] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "用户打标签（登录后同步到记事本，未登录时保存在本机）：",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_61, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue: $data.config.openTag,
+                                        "onUpdate:modelValue":
+                                          _cache[25] ||
+                                          (_cache[25] = ($event) =>
+                                            ($data.config.openTag = $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_62, [
+                                  _cache[72] ||
+                                    (_cache[72] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "划词显示Base64解码框",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_63, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue: $data.config.base64,
+                                        "onUpdate:modelValue":
+                                          _cache[26] ||
+                                          (_cache[26] = ($event) =>
+                                            ($data.config.base64 = $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_64, [
+                                  _cache[73] ||
+                                    (_cache[73] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "自动签到",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_65, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue: $data.config.autoSignin,
+                                        "onUpdate:modelValue":
+                                          _cache[27] ||
+                                          (_cache[27] = ($event) =>
+                                            ($data.config.autoSignin = $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_66, [
+                                  vue.createElementVNode("div", _hoisted_67, [
+                                    _cache[74] ||
+                                      (_cache[74] = vue.createElementVNode(
+                                        "label",
+                                        { class: "item-title" },
+                                        "自定义背景",
+                                        -1,
+                                      )),
+                                    vue.createElementVNode("div", _hoisted_68, [
+                                      vue.withDirectives(
+                                        vue.createElementVNode(
+                                          "input",
+                                          {
+                                            type: "text",
+                                            "onUpdate:modelValue":
+                                              _cache[28] ||
+                                              (_cache[28] = ($event) =>
+                                                ($data.config.customBgColor =
+                                                  $event)),
+                                          },
+                                          null,
+                                          512,
+                                        ),
+                                        [
+                                          [
+                                            vue.vModelText,
+                                            $data.config.customBgColor,
+                                          ],
+                                        ],
+                                      ),
+                                    ]),
+                                  ]),
+                                  _cache[75] ||
+                                    (_cache[75] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc" },
+                                      [
+                                        vue.createTextVNode(
+                                          " 未设定此值时，则脚本就什么都不做，V站大部分页面背景颜色默认为 #e2e2e2，少部分页面有特定背景。接受一个合法的css color值：例如",
+                                        ),
+                                        vue.createElementVNode(
+                                          "a",
+                                          {
+                                            href: "https://developer.mozilla.org/zh-CN/docs/Web/CSS/color_value",
+                                            target: "_blank",
+                                          },
+                                          "red、#ffffff、rgb(222,222,22)(点此查看)",
+                                        ),
+                                        vue.createTextVNode("等等。 "),
+                                      ],
+                                      -1,
+                                    )),
+                                  _cache[76] ||
+                                    (_cache[76] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc danger" },
+                                      " 提示：此项需要刷新页面才能生效 ",
+                                      -1,
+                                    )),
+                                ]),
+                                _cache[87] ||
+                                  (_cache[87] = vue.createElementVNode(
+                                    "div",
+                                    { class: "row" },
+                                    [
+                                      vue.createElementVNode(
+                                        "label",
+                                        { class: "main-title" },
+                                        "消息通知",
+                                      ),
+                                    ],
+                                    -1,
+                                  )),
+                                vue.createElementVNode("div", _hoisted_69, [
+                                  _cache[77] ||
+                                    (_cache[77] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "接管未读提醒页面",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_70, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue:
+                                          $data.config.notice
+                                            .takeOverNoticePage,
+                                        "onUpdate:modelValue":
+                                          _cache[29] ||
+                                          (_cache[29] = ($event) =>
+                                            ($data.config.notice.takeOverNoticePage =
+                                              $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                vue.createElementVNode("div", _hoisted_71, [
+                                  _cache[78] ||
+                                    (_cache[78] = vue.createElementVNode(
+                                      "label",
+                                      { class: "item-title" },
+                                      "定时查询未读提醒",
+                                      -1,
+                                    )),
+                                  vue.createElementVNode("div", _hoisted_72, [
+                                    vue.createVNode(
+                                      _component_BaseSwitch,
+                                      {
+                                        modelValue:
+                                          $data.config.notice.loopCheckNotice,
+                                        "onUpdate:modelValue":
+                                          _cache[30] ||
+                                          (_cache[30] = ($event) =>
+                                            ($data.config.notice.loopCheckNotice =
+                                              $event)),
+                                      },
+                                      null,
+                                      8,
+                                      ["modelValue"],
+                                    ),
+                                  ]),
+                                ]),
+                                _cache[88] ||
+                                  (_cache[88] = vue.createElementVNode(
+                                    "div",
+                                    { class: "desc" },
+                                    " 开启此功能会带来以下影响： 1、你的IP可能会被封禁 2、消耗更多流量，给服务器带来更大的负担 3、你的V站浏览进度条会变快 ",
+                                    -1,
+                                  )),
+                                $data.config.notice.loopCheckNotice
+                                  ? (vue.openBlock(),
+                                    vue.createElementBlock("div", _hoisted_73, [
+                                      vue.createElementVNode(
+                                        "div",
+                                        _hoisted_74,
+                                        [
+                                          _cache[80] ||
+                                            (_cache[80] =
+                                              vue.createElementVNode(
+                                                "label",
+                                                { class: "item-title" },
+                                                "查询间隔",
+                                                -1,
+                                              )),
+                                          vue.createElementVNode(
+                                            "div",
+                                            _hoisted_75,
+                                            [
+                                              vue.createElementVNode(
+                                                "input",
+                                                {
+                                                  type: "number",
+                                                  value:
+                                                    $data.config.notice
+                                                      .loopCheckNoticeInterval,
+                                                  onBlur:
+                                                    _cache[31] ||
+                                                    (_cache[31] = (e2) =>
+                                                      ($data.config.notice.loopCheckNoticeInterval =
+                                                        e2.target.value)),
+                                                  style: {
+                                                    "margin-right": "1rem",
+                                                  },
+                                                },
+                                                null,
+                                                40,
+                                                _hoisted_76,
+                                              ),
+                                              _cache[79] ||
+                                                (_cache[79] =
+                                                  vue.createTextVNode(
+                                                    "分钟 ",
+                                                    -1,
+                                                  )),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      _cache[82] ||
+                                        (_cache[82] = vue.createElementVNode(
+                                          "div",
+                                          { class: "desc" },
+                                          " 设置值太小，会导致频繁请求，你的IP可能会被封禁，建议设置为5，即每次5分钟查询一次 ",
+                                          -1,
+                                        )),
+                                      vue.createElementVNode(
+                                        "div",
+                                        _hoisted_77,
+                                        [
+                                          _cache[81] ||
+                                            (_cache[81] =
+                                              vue.createElementVNode(
+                                                "label",
+                                                { class: "item-title" },
+                                                "当有新未读提醒时，网页标题闪烁",
+                                                -1,
+                                              )),
+                                          vue.createElementVNode(
+                                            "div",
+                                            _hoisted_78,
+                                            [
+                                              vue.createVNode(
+                                                _component_BaseSwitch,
+                                                {
+                                                  modelValue:
+                                                    $data.config.notice
+                                                      .whenNewNoticeGlimmer,
+                                                  "onUpdate:modelValue":
+                                                    _cache[32] ||
+                                                    (_cache[32] = ($event) =>
+                                                      ($data.config.notice.whenNewNoticeGlimmer =
+                                                        $event)),
+                                                },
+                                                null,
+                                                8,
+                                                ["modelValue"],
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      _cache[83] ||
+                                        (_cache[83] = vue.createElementVNode(
+                                          "div",
+                                          { class: "row" },
+                                          [
+                                            vue.createElementVNode(
+                                              "label",
+                                              { class: "item-title" },
+                                              "钉钉Webhook地址",
+                                            ),
+                                          ],
+                                          -1,
+                                        )),
+                                      vue.createElementVNode(
+                                        "div",
+                                        _hoisted_79,
+                                        [
+                                          vue.createElementVNode(
+                                            "input",
+                                            {
+                                              type: "text",
+                                              value:
+                                                $data.config.notice.ddWebhook,
+                                              onBlur:
+                                                _cache[33] ||
+                                                (_cache[33] = (e2) =>
+                                                  ($data.config.notice.ddWebhook =
+                                                    e2.target.value)),
+                                              style: { width: "100%" },
+                                            },
+                                            null,
+                                            40,
+                                            _hoisted_80,
+                                          ),
+                                        ],
+                                      ),
+                                    ]))
+                                  : vue.createCommentVNode("", true),
+                                _cache[89] ||
+                                  (_cache[89] = vue.createElementVNode(
+                                    "div",
+                                    { class: "desc danger" },
+                                    " 提示：此项需要刷新页面才能生效 ",
+                                    -1,
+                                  )),
+                              ]))
+                            : vue.createCommentVNode("", true),
+                          $data.tabIndex === 3
+                            ? (vue.openBlock(),
+                              vue.createElementBlock("div", _hoisted_81, [
+                                _cache[97] ||
+                                  (_cache[97] = vue.createElementVNode(
+                                    "h1",
+                                    null,
+                                    "V2EX Pro",
+                                    -1,
+                                  )),
+                                vue.createElementVNode("div", _hoisted_82, []),
+                                vue.createElementVNode("div", _hoisted_90, [
+                                  vue.createVNode(_component_Icon, {
+                                    icon: "icon-park-outline:tips",
+                                  }),
+                                  _cache[96] ||
+                                    (_cache[96] = vue.createElementVNode(
+                                      "span",
+                                      null,
+                                      "代码完全开源（GPL-3.0），不放心也可自行拷贝下来修改~",
+                                      -1,
+                                    )),
+                                ]),
+                              ]))
+                            : vue.createCommentVNode("", true),
+                          $data.tabIndex === 4
+                            ? (vue.openBlock(),
+                              vue.createElementBlock("div", _hoisted_91, [
+                                vue.createElementVNode("div", _hoisted_92, [
+                                  _cache[99] ||
+                                    (_cache[99] = vue.createElementVNode(
                                       "label",
                                       { class: "item-title" },
                                       "主题宽度",
                                       -1,
                                     )),
-                                  vue.createElementVNode("div", _hoisted_43, [
+                                  vue.createElementVNode("div", _hoisted_93, [
                                     vue.withDirectives(
                                       vue.createElementVNode(
                                         "input",
                                         {
                                           type: "text",
                                           "onUpdate:modelValue":
-                                            _cache[19] ||
-                                            (_cache[19] = ($event) =>
+                                            _cache[34] ||
+                                            (_cache[34] = ($event) =>
                                               ($data.config.postWidth =
                                                 $event)),
                                         },
@@ -5208,218 +6012,6 @@
                                         ],
                                       ],
                                     ),
-                                  ]),
-                                ]),
-                                _cache[61] ||
-                                  (_cache[61] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc" },
-                                    [
-                                      vue.createTextVNode(
-                                        " 未设定此值时，则默认宽度为77rem。接受合法的width值： ",
-                                      ),
-                                      vue.createElementVNode(
-                                        "a",
-                                        {
-                                          style: {
-                                            color: "#40a9ff",
-                                            "text-decoration": "underline",
-                                          },
-                                          href: "https://vue3js.cn/interview/css/em_px_rem_vh_vw.html#%E4%BA%8C%E3%80%81%E5%8D%95%E4%BD%8D",
-                                          target: "_blank",
-                                        },
-                                        "rem、px、vw、vh(点此查看)",
-                                      ),
-                                      vue.createTextVNode(
-                                        "。 vw代表屏幕百分比，如想要屏幕的66%，请填写66vw ",
-                                      ),
-                                    ],
-                                    -1,
-                                  )),
-                                _cache[62] ||
-                                  (_cache[62] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc" },
-                                    " 提示：此项设置以后，单独打开详情页时会出现主题突然变宽（窄）的问题，暂时无解 ",
-                                    -1,
-                                  )),
-                                _cache[63] ||
-                                  (_cache[63] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc danger" },
-                                    " 提示：此项需要刷新页面才能生效 ",
-                                    -1,
-                                  )),
-                              ]),
-                              _cache[65] ||
-                                (_cache[65] = vue.createElementVNode(
-                                  "div",
-                                  { class: "row" },
-                                  [
-                                    vue.createElementVNode(
-                                      "label",
-                                      { class: "main-title" },
-                                      "高赞回复",
-                                    ),
-                                  ],
-                                  -1,
-                                )),
-                              vue.createElementVNode("div", _hoisted_44, [
-                                _cache[64] ||
-                                  (_cache[64] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "显示高赞回复",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_45, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue: $data.config.showTopReply,
-                                      "onUpdate:modelValue":
-                                        _cache[20] ||
-                                        (_cache[20] = ($event) =>
-                                          ($data.config.showTopReply = $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_46, [
-                                vue.createElementVNode(
-                                  "label",
-                                  _hoisted_47,
-                                  "最多显示" +
-                                    vue.toDisplayString(
-                                      $data.config.topReplyCount,
-                                    ) +
-                                    "个高赞回复",
-                                  1,
-                                ),
-                                vue.createElementVNode("div", _hoisted_48, [
-                                  vue.withDirectives(
-                                    vue.createElementVNode(
-                                      "input",
-                                      {
-                                        type: "number",
-                                        min: "1",
-                                        "onUpdate:modelValue":
-                                          _cache[21] ||
-                                          (_cache[21] = ($event) =>
-                                            ($data.config.topReplyCount =
-                                              $event)),
-                                      },
-                                      null,
-                                      512,
-                                    ),
-                                    [
-                                      [
-                                        vue.vModelText,
-                                        $data.config.topReplyCount,
-                                      ],
-                                    ],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_49, [
-                                vue.createElementVNode(
-                                  "label",
-                                  _hoisted_50,
-                                  "最少需要" +
-                                    vue.toDisplayString(
-                                      $data.config.topReplyLoveMinCount,
-                                    ) +
-                                    "个赞才能被判定为高赞",
-                                  1,
-                                ),
-                                vue.createElementVNode("div", _hoisted_51, [
-                                  vue.withDirectives(
-                                    vue.createElementVNode(
-                                      "input",
-                                      {
-                                        type: "number",
-                                        min: "1",
-                                        "onUpdate:modelValue":
-                                          _cache[22] ||
-                                          (_cache[22] = ($event) =>
-                                            ($data.config.topReplyLoveMinCount =
-                                              $event)),
-                                      },
-                                      null,
-                                      512,
-                                    ),
-                                    [
-                                      [
-                                        vue.vModelText,
-                                        $data.config.topReplyLoveMinCount,
-                                      ],
-                                    ],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode(
-                                "div",
-                                { class: "row border" },
-                                [
-                                  vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "高赞统计最多抓取页数",
-                                    -1,
-                                  ),
-                                  vue.createElementVNode(
-                                    "div",
-                                    { class: "wrapper" },
-                                    [
-                                      vue.withDirectives(
-                                        vue.createElementVNode(
-                                          "input",
-                                          {
-                                            type: "number",
-                                            min: "1",
-                                            max: "100",
-                                            "onUpdate:modelValue": ($event) =>
-                                              ($data.config.topReplyMaxPages =
-                                                $event),
-                                          },
-                                          null,
-                                          512,
-                                        ),
-                                        [
-                                          [
-                                            vue.vModelText,
-                                            $data.config.topReplyMaxPages,
-                                          ],
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ]))
-                          : vue.createCommentVNode("", true),
-                        $data.tabIndex === 2
-                          ? (vue.openBlock(),
-                            vue.createElementBlock("div", _hoisted_52, [
-                              _cache[84] ||
-                                (_cache[84] = vue.createElementVNode(
-                                  "div",
-                                  { class: "row" },
-                                  [
-                                    vue.createElementVNode(
-                                      "label",
-                                      { class: "main-title" },
-                                      "收藏列表",
-                                    ),
-                                  ],
-                                  -1,
-                                )),
-                              vue.createElementVNode("div", _hoisted_53, [
-                                vue.createElementVNode("div", _hoisted_54, [
-                                  vue.createElementVNode("div", null, [
                                     vue.createVNode(
                                       _component_BaseButton,
                                       {
@@ -5428,8 +6020,8 @@
                                       },
                                       {
                                         default: vue.withCtx(() => [
-                                          ...(_cache[66] ||
-                                            (_cache[66] = [
+                                          ...(_cache[98] ||
+                                            (_cache[98] = [
                                               vue.createTextVNode("导出", -1),
                                             ])),
                                         ]),
@@ -5438,593 +6030,67 @@
                                       8,
                                       ["onClick", "loading"],
                                     ),
-                                    _cache[68] ||
-                                      (_cache[68] = vue.createElementVNode(
-                                        "span",
-                                        null,
-                                        "   ",
-                                        -1,
-                                      )),
-                                    vue.createElementVNode("div", _hoisted_55, [
-                                      vue.createVNode(
-                                        _component_BaseButton,
-                                        { loading: $data.importLoading },
-                                        {
-                                          default: vue.withCtx(() => [
-                                            ...(_cache[67] ||
-                                              (_cache[67] = [
-                                                vue.createTextVNode(
-                                                  "导入，并收藏",
-                                                  -1,
-                                                ),
-                                              ])),
-                                          ]),
-                                          _: 1,
-                                        },
-                                        8,
-                                        ["loading"],
-                                      ),
-                                      $data.showInput
-                                        ? (vue.openBlock(),
-                                          vue.createElementBlock(
-                                            "input",
-                                            {
-                                              key: 0,
-                                              type: "file",
-                                              style: {
-                                                position: "absolute",
-                                                width: "100%",
-                                                height: "100px",
-                                                opacity: "0",
-                                              },
-                                              onChange:
-                                                _cache[23] ||
-                                                (_cache[23] = (...args) =>
-                                                  $options.importCollectList &&
-                                                  $options.importCollectList(
-                                                    ...args,
-                                                  )),
-                                            },
-                                            null,
-                                            32,
-                                          ))
-                                        : vue.createCommentVNode("", true),
-                                    ]),
-                                    $data.importLoading
-                                      ? (vue.openBlock(),
-                                        vue.createElementBlock(
-                                          "div",
-                                          _hoisted_56,
-                                          " 导入中：" +
-                                            vue.toDisplayString($data.index) +
-                                            "/" +
-                                            vue.toDisplayString($data.total) +
-                                            " ，大约需要" +
-                                            vue.toDisplayString($data.endTime) +
-                                            "分钟，导入完成前请勿关闭和刷新本页面 ",
-                                          1,
-                                        ))
-                                      : vue.createCommentVNode("", true),
-                                    $data.importOk
-                                      ? (vue.openBlock(),
-                                        vue.createElementBlock(
-                                          "div",
-                                          _hoisted_57,
-                                          " 导入完成 ",
-                                        ))
-                                      : vue.createCommentVNode("", true),
                                   ]),
                                 ]),
-                                _cache[69] ||
-                                  (_cache[69] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc" },
-                                    " 默认导出为 json 文件，如需其他格式，请使用 ChatGpt/Deepseek 转换 ",
-                                    -1,
-                                  )),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_58, [
-                                _cache[70] ||
-                                  (_cache[70] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "收藏时提醒添加到书签",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_59, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue:
-                                        $data.config.collectBrowserNotice,
-                                      "onUpdate:modelValue":
-                                        _cache[24] ||
-                                        (_cache[24] = ($event) =>
-                                          ($data.config.collectBrowserNotice =
-                                            $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              _cache[85] ||
-                                (_cache[85] = vue.createElementVNode(
-                                  "div",
-                                  { class: "desc" },
-                                  " 解释：V站帐号一旦被封禁，则无法登录，无法查看账号收藏了 ",
-                                  -1,
-                                )),
-                              _cache[86] ||
-                                (_cache[86] = vue.createElementVNode(
-                                  "div",
-                                  { class: "row border" },
-                                  [
-                                    vue.createElementVNode(
-                                      "label",
-                                      { class: "main-title" },
-                                      "其他",
-                                    ),
-                                  ],
-                                  -1,
-                                )),
-                              vue.createElementVNode("div", _hoisted_60, [
-                                _cache[71] ||
-                                  (_cache[71] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "用户打标签（登录后同步到记事本，未登录时保存在本机）：",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_61, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue: $data.config.openTag,
-                                      "onUpdate:modelValue":
-                                        _cache[25] ||
-                                        (_cache[25] = ($event) =>
-                                          ($data.config.openTag = $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_62, [
-                                _cache[72] ||
-                                  (_cache[72] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "划词显示Base64解码框",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_63, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue: $data.config.base64,
-                                      "onUpdate:modelValue":
-                                        _cache[26] ||
-                                        (_cache[26] = ($event) =>
-                                          ($data.config.base64 = $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_64, [
-                                _cache[73] ||
-                                  (_cache[73] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "自动签到",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_65, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue: $data.config.autoSignin,
-                                      "onUpdate:modelValue":
-                                        _cache[27] ||
-                                        (_cache[27] = ($event) =>
-                                          ($data.config.autoSignin = $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_66, [
-                                vue.createElementVNode("div", _hoisted_67, [
-                                  _cache[74] ||
-                                    (_cache[74] = vue.createElementVNode(
-                                      "label",
-                                      { class: "item-title" },
-                                      "自定义背景",
-                                      -1,
-                                    )),
-                                  vue.createElementVNode("div", _hoisted_68, [
-                                    vue.withDirectives(
-                                      vue.createElementVNode(
-                                        "input",
+                                vue.createElementVNode("div", _hoisted_94, [
+                                  vue.createElementVNode("div", _hoisted_95, [
+                                    _cache[100] ||
+                                      (_cache[100] = vue.createElementVNode(
+                                        "label",
+                                        { class: "item-title" },
+                                        "v2新帖挂件",
+                                        -1,
+                                      )),
+                                    vue.createElementVNode("div", _hoisted_96, [
+                                      vue.createVNode(
+                                        _component_BaseSwitch,
                                         {
-                                          type: "text",
+                                          modelValue:
+                                            $data.config.notice.loopCheckNotice,
                                           "onUpdate:modelValue":
-                                            _cache[28] ||
-                                            (_cache[28] = ($event) =>
-                                              ($data.config.customBgColor =
+                                            _cache[35] ||
+                                            (_cache[35] = ($event) =>
+                                              ($data.config.notice.loopCheckNotice =
                                                 $event)),
                                         },
                                         null,
-                                        512,
+                                        8,
+                                        ["modelValue"],
                                       ),
-                                      [
-                                        [
-                                          vue.vModelText,
-                                          $data.config.customBgColor,
-                                        ],
-                                      ],
-                                    ),
+                                    ]),
                                   ]),
-                                ]),
-                                _cache[75] ||
-                                  (_cache[75] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc" },
-                                    [
-                                      vue.createTextVNode(
-                                        " 未设定此值时，则脚本就什么都不做，V站大部分页面背景颜色默认为 #e2e2e2，少部分页面有特定背景。接受一个合法的css color值：例如",
-                                      ),
-                                      vue.createElementVNode(
-                                        "a",
-                                        {
-                                          href: "https://developer.mozilla.org/zh-CN/docs/Web/CSS/color_value",
-                                          target: "_blank",
-                                        },
-                                        "red、#ffffff、rgb(222,222,22)(点此查看)",
-                                      ),
-                                      vue.createTextVNode("等等。 "),
-                                    ],
-                                    -1,
-                                  )),
-                                _cache[76] ||
-                                  (_cache[76] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc danger" },
-                                    " 提示：此项需要刷新页面才能生效 ",
-                                    -1,
-                                  )),
-                              ]),
-                              _cache[87] ||
-                                (_cache[87] = vue.createElementVNode(
-                                  "div",
-                                  { class: "row" },
-                                  [
-                                    vue.createElementVNode(
-                                      "label",
-                                      { class: "main-title" },
-                                      "消息通知",
-                                    ),
-                                  ],
-                                  -1,
-                                )),
-                              vue.createElementVNode("div", _hoisted_69, [
-                                _cache[77] ||
-                                  (_cache[77] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "接管未读提醒页面",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_70, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue:
-                                        $data.config.notice.takeOverNoticePage,
-                                      "onUpdate:modelValue":
-                                        _cache[29] ||
-                                        (_cache[29] = ($event) =>
-                                          ($data.config.notice.takeOverNoticePage =
-                                            $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_71, [
-                                _cache[78] ||
-                                  (_cache[78] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "定时查询未读提醒",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_72, [
-                                  vue.createVNode(
-                                    _component_BaseSwitch,
-                                    {
-                                      modelValue:
-                                        $data.config.notice.loopCheckNotice,
-                                      "onUpdate:modelValue":
-                                        _cache[30] ||
-                                        (_cache[30] = ($event) =>
-                                          ($data.config.notice.loopCheckNotice =
-                                            $event)),
-                                    },
-                                    null,
-                                    8,
-                                    ["modelValue"],
-                                  ),
-                                ]),
-                              ]),
-                              _cache[88] ||
-                                (_cache[88] = vue.createElementVNode(
-                                  "div",
-                                  { class: "desc" },
-                                  " 开启此功能会带来以下影响： 1、你的IP可能会被封禁 2、消耗更多流量，给服务器带来更大的负担 3、你的V站浏览进度条会变快 ",
-                                  -1,
-                                )),
-                              $data.config.notice.loopCheckNotice
-                                ? (vue.openBlock(),
-                                  vue.createElementBlock("div", _hoisted_73, [
-                                    vue.createElementVNode("div", _hoisted_74, [
-                                      _cache[80] ||
-                                        (_cache[80] = vue.createElementVNode(
-                                          "label",
-                                          { class: "item-title" },
-                                          "查询间隔",
-                                          -1,
-                                        )),
-                                      vue.createElementVNode(
-                                        "div",
-                                        _hoisted_75,
-                                        [
-                                          vue.createElementVNode(
-                                            "input",
-                                            {
-                                              type: "number",
-                                              value:
-                                                $data.config.notice
-                                                  .loopCheckNoticeInterval,
-                                              onBlur:
-                                                _cache[31] ||
-                                                (_cache[31] = (e2) =>
-                                                  ($data.config.notice.loopCheckNoticeInterval =
-                                                    e2.target.value)),
-                                              style: { "margin-right": "1rem" },
-                                            },
-                                            null,
-                                            40,
-                                            _hoisted_76,
-                                          ),
-                                          _cache[79] ||
-                                            (_cache[79] = vue.createTextVNode(
-                                              "分钟 ",
-                                              -1,
-                                            )),
-                                        ],
-                                      ),
-                                    ]),
-                                    _cache[82] ||
-                                      (_cache[82] = vue.createElementVNode(
-                                        "div",
-                                        { class: "desc" },
-                                        " 设置值太小，会导致频繁请求，你的IP可能会被封禁，建议设置为5，即每次5分钟查询一次 ",
-                                        -1,
-                                      )),
-                                    vue.createElementVNode("div", _hoisted_77, [
-                                      _cache[81] ||
-                                        (_cache[81] = vue.createElementVNode(
-                                          "label",
-                                          { class: "item-title" },
-                                          "当有新未读提醒时，网页标题闪烁",
-                                          -1,
-                                        )),
-                                      vue.createElementVNode(
-                                        "div",
-                                        _hoisted_78,
-                                        [
-                                          vue.createVNode(
-                                            _component_BaseSwitch,
-                                            {
-                                              modelValue:
-                                                $data.config.notice
-                                                  .whenNewNoticeGlimmer,
-                                              "onUpdate:modelValue":
-                                                _cache[32] ||
-                                                (_cache[32] = ($event) =>
-                                                  ($data.config.notice.whenNewNoticeGlimmer =
-                                                    $event)),
-                                            },
-                                            null,
-                                            8,
-                                            ["modelValue"],
-                                          ),
-                                        ],
-                                      ),
-                                    ]),
-                                    _cache[83] ||
-                                      (_cache[83] = vue.createElementVNode(
-                                        "div",
-                                        { class: "row" },
-                                        [
-                                          vue.createElementVNode(
-                                            "label",
-                                            { class: "item-title" },
-                                            "钉钉Webhook地址",
-                                          ),
-                                        ],
-                                        -1,
-                                      )),
-                                    vue.createElementVNode("div", _hoisted_79, [
-                                      vue.createElementVNode(
-                                        "input",
-                                        {
-                                          type: "text",
-                                          value: $data.config.notice.ddWebhook,
-                                          onBlur:
-                                            _cache[33] ||
-                                            (_cache[33] = (e2) =>
-                                              ($data.config.notice.ddWebhook =
-                                                e2.target.value)),
-                                          style: { width: "100%" },
-                                        },
-                                        null,
-                                        40,
-                                        _hoisted_80,
-                                      ),
-                                    ]),
-                                  ]))
-                                : vue.createCommentVNode("", true),
-                              _cache[89] ||
-                                (_cache[89] = vue.createElementVNode(
-                                  "div",
-                                  { class: "desc danger" },
-                                  " 提示：此项需要刷新页面才能生效 ",
-                                  -1,
-                                )),
-                            ]))
-                          : vue.createCommentVNode("", true),
-                        $data.tabIndex === 3
-                          ? (vue.openBlock(),
-                            vue.createElementBlock("div", _hoisted_81, [
-                              _cache[97] ||
-                                (_cache[97] = vue.createElementVNode(
-                                  "h1",
-                                  null,
-                                  "V2EX Pro",
-                                  -1,
-                                )),
-                              vue.createElementVNode("div", _hoisted_82, []),
-                              vue.createElementVNode("div", _hoisted_90, [
-                                vue.createVNode(_component_Icon, {
-                                  icon: "icon-park-outline:tips",
-                                }),
-                                _cache[96] ||
-                                  (_cache[96] = vue.createElementVNode(
-                                    "span",
-                                    null,
-                                    "代码完全开源（GPL-3.0），不放心也可自行拷贝下来修改~",
-                                    -1,
-                                  )),
-                              ]),
-                            ]))
-                          : vue.createCommentVNode("", true),
-                        $data.tabIndex === 4
-                          ? (vue.openBlock(),
-                            vue.createElementBlock("div", _hoisted_91, [
-                              vue.createElementVNode("div", _hoisted_92, [
-                                _cache[99] ||
-                                  (_cache[99] = vue.createElementVNode(
-                                    "label",
-                                    { class: "item-title" },
-                                    "主题宽度",
-                                    -1,
-                                  )),
-                                vue.createElementVNode("div", _hoisted_93, [
-                                  vue.withDirectives(
-                                    vue.createElementVNode(
-                                      "input",
-                                      {
-                                        type: "text",
-                                        "onUpdate:modelValue":
-                                          _cache[34] ||
-                                          (_cache[34] = ($event) =>
-                                            ($data.config.postWidth = $event)),
-                                      },
-                                      null,
-                                      512,
-                                    ),
-                                    [[vue.vModelText, $data.config.postWidth]],
-                                  ),
-                                  vue.createVNode(
-                                    _component_BaseButton,
-                                    {
-                                      onClick: $options.exportCollectList,
-                                      loading: $data.exportLoading,
-                                    },
-                                    {
-                                      default: vue.withCtx(() => [
-                                        ...(_cache[98] ||
-                                          (_cache[98] = [
-                                            vue.createTextVNode("导出", -1),
-                                          ])),
-                                      ]),
-                                      _: 1,
-                                    },
-                                    8,
-                                    ["onClick", "loading"],
-                                  ),
-                                ]),
-                              ]),
-                              vue.createElementVNode("div", _hoisted_94, [
-                                vue.createElementVNode("div", _hoisted_95, [
-                                  _cache[100] ||
-                                    (_cache[100] = vue.createElementVNode(
-                                      "label",
-                                      { class: "item-title" },
-                                      "v2新帖挂件",
+                                  _cache[101] ||
+                                    (_cache[101] = vue.createElementVNode(
+                                      "div",
+                                      { class: "desc" },
+                                      "",
                                       -1,
                                     )),
-                                  vue.createElementVNode("div", _hoisted_96, [
-                                    vue.createVNode(
-                                      _component_BaseSwitch,
-                                      {
-                                        modelValue:
-                                          $data.config.notice.loopCheckNotice,
-                                        "onUpdate:modelValue":
-                                          _cache[35] ||
-                                          (_cache[35] = ($event) =>
-                                            ($data.config.notice.loopCheckNotice =
-                                              $event)),
-                                      },
-                                      null,
-                                      8,
-                                      ["modelValue"],
-                                    ),
-                                  ]),
                                 ]),
-                                _cache[101] ||
-                                  (_cache[101] = vue.createElementVNode(
-                                    "div",
-                                    { class: "desc" },
-                                    "",
-                                    -1,
-                                  )),
-                              ]),
-                            ]))
-                          : vue.createCommentVNode("", true),
+                              ]))
+                            : vue.createCommentVNode("", true),
+                        ]),
                       ]),
                     ]),
                   ]),
-                ]),
-                vue.createVNode(
-                  _component_NoticeModal,
-                  {
-                    show: $data.showNotice,
-                    "onUpdate:show":
-                      _cache[36] ||
-                      (_cache[36] = ($event) => ($data.showNotice = $event)),
-                    onConfirm:
-                      _cache[37] ||
-                      (_cache[37] = ($event) =>
-                        ($data.config.viewType = "card")),
-                  },
-                  null,
-                  8,
-                  ["show"],
-                ),
-              ]))
+                  vue.createVNode(
+                    _component_NoticeModal,
+                    {
+                      show: $data.showNotice,
+                      "onUpdate:show":
+                        _cache[36] ||
+                        (_cache[36] = ($event) => ($data.showNotice = $event)),
+                      onConfirm:
+                        _cache[37] ||
+                        (_cache[37] = ($event) =>
+                          ($data.config.viewType = "card")),
+                    },
+                    null,
+                    8,
+                    ["show"],
+                  ),
+                ],
+              ))
             : vue.createCommentVNode("", true),
         ]),
         _: 1,
@@ -6805,7 +6871,7 @@
           floor: post.value.replyCount + 1,
           reply_content: show_content ?? "",
           children: [],
-          replyUsers: targetUser ? [targetUser] : (replyUser ? [replyUser] : []),
+          replyUsers: targetUser ? [targetUser] : replyUser ? [replyUser] : [],
           replyFloor: replyFloor || -1,
           level: useType === "reply-comment" ? 1 : 0,
         };
@@ -8817,8 +8883,7 @@
                           ),
                         ]))
                       : vue.createCommentVNode("", true),
-                    vue.unref(config2).openTag &&
-                    __props.isRight
+                    vue.unref(config2).openTag && __props.isRight
                       ? (vue.openBlock(true),
                         vue.createElementBlock(
                           vue.Fragment,
@@ -12000,10 +12065,7 @@
         if (functions.isExternalLink(currentHref)) {
           if (that.config.openExternalLinkInNewTab ?? true) {
             functions.stopEvent(e2);
-            functions.openNewTab(
-              currentHref,
-              that.config.newTabOpenActive,
-            );
+            functions.openNewTab(currentHref, that.config.newTabOpenActive);
             return;
           }
         }
@@ -13916,8 +13978,8 @@
         text-decoration: none !important;
       }
       .tab_current {
-        background: var(--v2-primary) !important;
-        color: #ffffff !important;
+        background: var(--v2p-color-accent-fill) !important;
+        color: var(--v2p-color-on-accent) !important;
         font-weight: 600 !important;
         box-shadow: 0 2px 8px var(--v2-primary-glow) !important;
       }
@@ -13942,10 +14004,10 @@
         text-decoration: none !important;
       }
       .page_current {
-        background: var(--v2-primary) !important;
-        color: #ffffff !important;
+        background: var(--v2p-color-accent-fill) !important;
+        color: var(--v2p-color-on-accent) !important;
         font-weight: 600 !important;
-        border-color: var(--v2-primary) !important;
+        border-color: var(--v2p-color-accent-fill) !important;
         box-shadow: 0 2px 6px var(--v2-primary-glow) !important;
       }
 
@@ -14024,8 +14086,8 @@
         border: 1px solid transparent !important;
       }
       #Main .cell .count_livid:hover, .count_livid:hover {
-        background: var(--v2-primary) !important;
-        color: #ffffff !important;
+        background: var(--v2p-color-accent-fill) !important;
+        color: var(--v2p-color-on-accent) !important;
         transform: scale(1.08) !important;
         box-shadow: 0 3px 8px var(--v2-primary-glow) !important;
       }
@@ -14436,9 +14498,9 @@
       }
       .post-detail-floating-dock .dock-btn:hover {
         transform: translateY(-2px) scale(1.08) !important;
-        background: var(--v2-primary) !important;
-        color: #ffffff !important;
-        border-color: var(--v2-primary) !important;
+        background: var(--v2p-color-accent-fill) !important;
+        color: var(--v2p-color-on-accent) !important;
+        border-color: var(--v2p-color-accent-fill) !important;
         box-shadow: 0 8px 25px var(--v2-primary-glow) !important;
       }
       .post-detail-floating-dock .dock-btn.dock-close:hover {
@@ -14466,9 +14528,9 @@
       .post-detail-floating-dock .scroll-to:hover,
       .post-detail-floating-dock .scroll-to:focus-within {
         transform: translateY(-2px) !important;
-        background: var(--v2-primary) !important;
-        color: #ffffff !important;
-        border-color: var(--v2-primary) !important;
+        background: var(--v2p-color-accent-fill) !important;
+        color: var(--v2p-color-on-accent) !important;
+        border-color: var(--v2p-color-accent-fill) !important;
         box-shadow: 0 8px 25px var(--v2-primary-glow) !important;
       }
       .post-detail-floating-dock .scroll-to input {
@@ -14554,7 +14616,8 @@
 
       /* 按钮现代微质感 */
       .base-button.primary {
-        background: linear-gradient(135deg, var(--v2-primary), var(--v2-primary-hover)) !important;
+        background: linear-gradient(135deg, var(--v2p-color-accent-fill), var(--v2-primary-hover)) !important;
+        color: var(--v2p-color-on-accent) !important;
         box-shadow: 0 2px 8px var(--v2-primary-glow) !important;
         border-radius: 8px !important;
         font-weight: 550 !important;
@@ -15471,9 +15534,7 @@
         for (let i = 0; i < def.titles.length; i++) {
           const title = def.titles[i];
           const matched =
-            def.key === "node-nav"
-              ? text.includes(title)
-              : text === title;
+            def.key === "node-nav" ? text.includes(title) : text === title;
           if (matched) {
             found = $(this);
             return false;
@@ -15863,7 +15924,8 @@
         const el = linkMap.get(item.href);
         const domName = el ? getNavTabName(el) : "";
         next.push({
-          name: domName || item.name || NAV_DEFAULT_NAMES[item.href] || item.href,
+          name:
+            domName || item.name || NAV_DEFAULT_NAMES[item.href] || item.href,
           href: item.href,
           visible: item.visible !== false,
         });
@@ -16168,7 +16230,11 @@
     function onNavMenuScroll(e2) {
       if (!navMenuEl) return;
       // 面板内部列表滚动不关闭，仅响应页面滚动
-      if (e2.target && e2.target !== document && navMenuEl.contains(e2.target)) {
+      if (
+        e2.target &&
+        e2.target !== document &&
+        navMenuEl.contains(e2.target)
+      ) {
         return;
       }
       closeNavMenu();
@@ -16353,9 +16419,7 @@
           ? editor.selectionStart
           : editor.value.length;
       const end =
-        typeof editor.selectionEnd === "number"
-          ? editor.selectionEnd
-          : start;
+        typeof editor.selectionEnd === "number" ? editor.selectionEnd : start;
       editor.value =
         editor.value.slice(0, start) + text + editor.value.slice(end);
       editor.dispatchEvent(new Event("input", { bubbles: true }));
@@ -16420,9 +16484,7 @@
         acceptNode(node) {
           const parent = node.parentElement;
           if (!parent) return NodeFilter.FILTER_REJECT;
-          if (
-            parent.closest("a, script, style, img, .v2p-b64-decoded")
-          ) {
+          if (parent.closest("a, script, style, img, .v2p-b64-decoded")) {
             return NodeFilter.FILTER_REJECT;
           }
           return NodeFilter.FILTER_ACCEPT;
@@ -16465,9 +16527,7 @@
           lastIndex = match.index + candidate.length;
         }
         if (!matched) return;
-        fragment.appendChild(
-          document.createTextNode(text.slice(lastIndex)),
-        );
+        fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
         node.parentNode.replaceChild(fragment, node);
       });
       return count;
@@ -16556,10 +16616,7 @@
 
     function toggleBase64Menu(button) {
       const menu = getBase64Menu();
-      if (
-        menu.classList.contains("show") &&
-        base64MenuAnchor === button
-      ) {
+      if (menu.classList.contains("show") && base64MenuAnchor === button) {
         hideBase64Menu();
         return;
       }
@@ -16629,14 +16686,10 @@
     }
 
     function ensureBase64Tools() {
-      document
-        .querySelectorAll(".post-detail-top-actions")
-        .forEach((bar) => {
-          if (bar.querySelector(".v2p-b64-btn")) return;
-          bar.appendChild(
-            createBase64Button("top-action-btn v2p-b64-btn"),
-          );
-        });
+      document.querySelectorAll(".post-detail-top-actions").forEach((bar) => {
+        if (bar.querySelector(".v2p-b64-btn")) return;
+        bar.appendChild(createBase64Button("top-action-btn v2p-b64-btn"));
+      });
       document
         .querySelectorAll(".post-detail-floating-dock")
         .forEach((dock) => {
@@ -16663,8 +16716,7 @@
           if (!usernameEl) return;
           const isSelf = usernameEl.textContent.trim() === loginName;
           const next = usernameEl.nextElementSibling;
-          const hasBadge =
-            next && next.classList.contains("v2p-you-badge");
+          const hasBadge = next && next.classList.contains("v2p-you-badge");
           if (isSelf) {
             if (hasBadge) return;
             const badge = document.createElement("span");
@@ -16718,10 +16770,7 @@
         window.pageType === PageType.Post
           ? Number(window.pageData.pageNo) || 1
           : 1;
-      const targetPage = Math.max(
-        1,
-        Math.ceil(floor / REPLY_FLOOR_PAGE_SIZE),
-      );
+      const targetPage = Math.max(1, Math.ceil(floor / REPLY_FLOOR_PAGE_SIZE));
       if (targetPage === currentPage) {
         showReplyMessage("warning", `本页没有第 ${floor} 楼`);
         return false;
@@ -16774,10 +16823,7 @@
           continue;
         }
         if (node.nodeType === 1) {
-          if (
-            node.matches &&
-            node.matches('a[href^="/member/"]')
-          ) {
+          if (node.matches && node.matches('a[href^="/member/"]')) {
             break;
           }
           node = walker.nextNode();
@@ -16795,19 +16841,17 @@
       // 楼中楼会改变 DOM 顺序，这里按楼层号找当前回复之前最近的一条同用户回复
       const currentFloor = Number(comment.dataset.floor) || 0;
       let result = 0;
-      document
-        .querySelectorAll("#app .comment[data-floor]")
-        .forEach((item) => {
-          if (item.closest(".top-reply")) return;
-          const floor = Number(item.dataset.floor) || 0;
-          if (!floor || floor >= currentFloor || floor <= result) return;
-          // 忽略没有 c_<楼层> 的高赞副本
-          if (!item.classList.contains(`c_${floor}`)) return;
-          const userEl = item.querySelector("a.username");
-          if (userEl && userEl.textContent.trim() === username) {
-            result = floor;
-          }
-        });
+      document.querySelectorAll("#app .comment[data-floor]").forEach((item) => {
+        if (item.closest(".top-reply")) return;
+        const floor = Number(item.dataset.floor) || 0;
+        if (!floor || floor >= currentFloor || floor <= result) return;
+        // 忽略没有 c_<楼层> 的高赞副本
+        if (!item.classList.contains(`c_${floor}`)) return;
+        const userEl = item.querySelector("a.username");
+        if (userEl && userEl.textContent.trim() === username) {
+          result = floor;
+        }
+      });
       return result;
     }
 
@@ -16821,11 +16865,7 @@
         floor = Number(raw);
         if (!Number.isFinite(floor) || floor < 1) return;
         url.searchParams.delete(REPLY_FLOOR_PARAM);
-        history.replaceState(
-          null,
-          "",
-          url.pathname + url.search + url.hash,
-        );
+        history.replaceState(null, "", url.pathname + url.search + url.hash);
       } catch (e2) {
         return;
       }
@@ -16925,10 +16965,7 @@
         "keydown",
         function (e2) {
           if (e2.key !== "Escape") return;
-          if (
-            !base64MenuEl ||
-            !base64MenuEl.classList.contains("show")
-          ) {
+          if (!base64MenuEl || !base64MenuEl.classList.contains("show")) {
             return;
           }
           // 菜单打开时只关闭菜单，避免同时触发详情弹框的 Esc 关闭
@@ -17319,7 +17356,9 @@
       const stageEl = viewerEl.querySelector(".v2p-image-viewer-stage");
       const imgEl = viewerEl.querySelector(".v2p-image-viewer-img");
       const loadingEl = viewerEl.querySelector(".v2p-image-viewer-loading");
-      const scaleTextEl = viewerEl.querySelector(".v2p-image-viewer-scale-text");
+      const scaleTextEl = viewerEl.querySelector(
+        ".v2p-image-viewer-scale-text",
+      );
       const counterEl = viewerEl.querySelector(".v2p-image-viewer-counter");
       const dividerEl = viewerEl.querySelector(".v2p-image-viewer-divider");
       const rotateBtn = viewerEl.querySelector(".v2p-image-viewer-rotate");
@@ -17441,7 +17480,8 @@
         // 若当前有可见图片且指定了切换方向，执行轻量滑出退场动效（120ms）
         if (direction !== 0 && imgEl.src && imgEl.style.opacity !== "0") {
           const exitOffset = direction > 0 ? -50 : 50;
-          imgEl.style.transition = "transform 0.12s ease-in, opacity 0.12s ease-in";
+          imgEl.style.transition =
+            "transform 0.12s ease-in, opacity 0.12s ease-in";
           imgEl.style.transform = `translate3d(${exitOffset}px, 0, 0) scale(0.96)`;
           imgEl.style.opacity = "0";
         }
@@ -17466,14 +17506,18 @@
 
       function collectGallery(clickedImg) {
         let scope = document;
-        const postDetail = clickedImg.closest ? clickedImg.closest(".post-detail") : null;
+        const postDetail = clickedImg.closest
+          ? clickedImg.closest(".post-detail")
+          : null;
         if (postDetail) {
           scope = postDetail;
         } else {
           scope = document.querySelector("#Main") || document;
         }
 
-        const imgs = Array.from(scope.querySelectorAll(IMAGE_PARENT_SELECTORS + " img")).filter(isEligibleImage);
+        const imgs = Array.from(
+          scope.querySelectorAll(IMAGE_PARENT_SELECTORS + " img"),
+        ).filter(isEligibleImage);
         const uniqueImgs = [];
         const seen = new Set();
         imgs.forEach((img) => {
@@ -17481,7 +17525,11 @@
             seen.add(img);
             const resolved = resolveOriginalSrc(img);
             if (resolved.src) {
-              uniqueImgs.push({ img, src: resolved.src, originHref: resolved.originHref });
+              uniqueImgs.push({
+                img,
+                src: resolved.src,
+                originHref: resolved.originHref,
+              });
             }
           }
         });
@@ -17489,7 +17537,11 @@
         let idx = uniqueImgs.findIndex((item) => item.img === clickedImg);
         if (idx === -1) {
           const fallback = resolveOriginalSrc(clickedImg);
-          uniqueImgs.unshift({ img: clickedImg, src: fallback.src, originHref: fallback.originHref });
+          uniqueImgs.unshift({
+            img: clickedImg,
+            src: fallback.src,
+            originHref: fallback.originHref,
+          });
           idx = 0;
         }
         return { list: uniqueImgs, index: idx };
@@ -17634,10 +17686,20 @@
 
       function isEligibleImage(img) {
         if (!img || img.tagName !== "IMG") return false;
-        if (img.classList.contains("avatar") || (img.closest && img.closest(".avatar"))) return false;
-        if (img.closest && img.closest(".emoticon-pack, .emoji, [data-emoji]")) return false;
+        if (
+          img.classList.contains("avatar") ||
+          (img.closest && img.closest(".avatar"))
+        )
+          return false;
+        if (img.closest && img.closest(".emoticon-pack, .emoji, [data-emoji]"))
+          return false;
         if (!img.closest || !img.closest(IMAGE_PARENT_SELECTORS)) return false;
-        if (img.naturalWidth > 0 && img.naturalWidth <= 32 && img.naturalHeight > 0 && img.naturalHeight <= 32) {
+        if (
+          img.naturalWidth > 0 &&
+          img.naturalWidth <= 32 &&
+          img.naturalHeight > 0 &&
+          img.naturalHeight <= 32
+        ) {
           return false;
         }
         return true;
@@ -17647,11 +17709,16 @@
         const parentA = img.closest ? img.closest("a") : null;
         if (parentA && parentA.href) {
           const href = parentA.href.trim();
-          if (/\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(href) || href.includes("imgur.com")) {
+          if (
+            /\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(href) ||
+            href.includes("imgur.com")
+          ) {
             return { src: href, originHref: href };
           }
         }
-        const originUrl = img.getAttribute("originUrl") || (img.dataset ? img.dataset.origin : "");
+        const originUrl =
+          img.getAttribute("originUrl") ||
+          (img.dataset ? img.dataset.origin : "");
         const src = originUrl || img.currentSrc || img.src;
         return { src, originHref: parentA ? parentA.href : src };
       }
@@ -17661,7 +17728,12 @@
         function (e) {
           const target = e.target;
           if (!target) return;
-          const img = target.tagName === "IMG" ? target : (target.closest ? target.closest("img") : null);
+          const img =
+            target.tagName === "IMG"
+              ? target
+              : target.closest
+                ? target.closest("img")
+                : null;
           if (!isEligibleImage(img)) return;
 
           e.preventDefault();

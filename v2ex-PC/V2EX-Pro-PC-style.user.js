@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - PC style
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.4
+// @version      1.0.5
 // @description  V2EX Pro PC 端样式脚本：统一设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁背景与主题类注入。须先于「V2EX Pro - PC」主脚本启用。
 // @description:zh-CN  V2EX Pro PC 端样式脚本：统一设计 Token、四主题（浅色/晨光/水色/深色）、防闪烁背景与主题类注入。须先于「V2EX Pro - PC」主脚本启用。
 // @author       git710
@@ -236,6 +236,9 @@ if (typeof GM_addStyle === "undefined") {
     --v2p-box-radius: 10px;
 }
 :root body {
+    /* 实心强调色填充及其前景：与文字强调色分离，按主题决定深/浅字（双端共享） */
+    --v2p-color-accent-fill: var(--v2p-color-accent-500);
+    --v2p-color-on-accent: #ffffff;
     --v2p-color-main-50: #f7f9fb;
     --v2p-color-main-100: #e6e6e6;
     --v2p-color-main-200: #ececec;
@@ -294,7 +297,7 @@ if (typeof GM_addStyle === "undefined") {
     --v2p-color-border: var(--v2p-color-main-200);
     --v2p-color-input-border: var(--v2p-color-main-300);
     --v2p-color-border-darker: var(--v2p-color-main-300);
-    --v2p-color-link-visited: var(--v2p-color-main-400);
+    --v2p-color-link-visited: var(--v2p-color-main-500);
     --v2p-color-error: #ef4444;
     --v2p-color-bg-error: #fee2e2;
     --v2p-color-cell-num: var(--v2p-color-main-350);
@@ -331,6 +334,8 @@ if (typeof GM_addStyle === "undefined") {
 }
 :root body.v2p-theme-light-default,
 :root body .v2p-theme-light-default {
+    --v2p-color-accent-fill: var(--v2p-color-accent-500);
+    --v2p-color-on-accent: #ffffff;
     --v2p-color-main-50: #f7f9fb;
     --v2p-color-main-100: #f2f2f2;
     --v2p-color-main-200: #ececec;
@@ -389,7 +394,7 @@ if (typeof GM_addStyle === "undefined") {
     --v2p-color-border: var(--v2p-color-main-200);
     --v2p-color-input-border: var(--v2p-color-main-300);
     --v2p-color-border-darker: var(--v2p-color-main-300);
-    --v2p-color-link-visited: var(--v2p-color-main-400);
+    --v2p-color-link-visited: var(--v2p-color-main-500);
     --v2p-color-error: #ef4444;
     --v2p-color-bg-error: #fee2e2;
     --v2p-color-cell-num: var(--v2p-color-main-350);
@@ -428,6 +433,9 @@ html.v2p-theme-dark-default body,
 :root[data-darkreader-scheme="dark"] body,
 :root body:where(:has(#Wrapper.Night)) {
     color-scheme: dark;
+    /* 浅蓝填充配深色字，避免白字对比度不足 */
+    --v2p-color-accent-fill: var(--v2p-color-accent-500);
+    --v2p-color-on-accent: #0d1117;
     --v2p-color-main-50: unset;
     --v2p-color-main-100: #2d333b;
     --v2p-color-main-200: #374151;
@@ -507,12 +515,25 @@ html.v2p-theme-dawn body,
     --v2p-color-pine: 197deg 53% 34%;
     --v2p-color-foam: 189deg 30% 48%;
     --v2p-color-iris: 268deg 21% 57%;
+    /* 晨光：补齐中性阶梯，避免直接消费 main-* 的点回落到浅色主题的冷灰蓝 */
+    --v2p-color-main-50: hsl(var(--v2p-color-surface));
+    --v2p-color-main-100: hsl(var(--v2p-color-overlay) / 60%);
+    --v2p-color-main-200: hsl(var(--v2p-color-muted) / 20%);
+    --v2p-color-main-300: hsl(var(--v2p-color-muted) / 35%);
+    --v2p-color-main-350: hsl(var(--v2p-color-muted) / 45%);
+    --v2p-color-main-400: hsl(var(--v2p-color-muted) / 55%);
+    --v2p-color-main-500: hsl(var(--v2p-color-subtle));
     --v2p-color-main-600: hsl(47, 48.15%, 21.26%); /* 修复：H5 原文缺分号 */
+    --v2p-color-main-700: hsl(38.09deg 19% 40%);
+    --v2p-color-main-800: hsl(38.09deg 19% 35%);
+    /* 青色填充配深色字（暖墨绿，保证 ≥4.5:1） */
+    --v2p-color-accent-fill: var(--v2p-color-accent-500);
+    --v2p-color-on-accent: #24332f;
     --v2p-color-accent-50: hsl(var(--v2p-color-foam) / 10%);
     --v2p-color-accent-100: hsl(var(--v2p-color-foam) / 20%);
     --v2p-color-accent-200: hsl(var(--v2p-color-foam) / 30%);
     --v2p-color-accent-300: hsl(var(--v2p-color-foam) / 40%);
-    --v2p-color-accent-400: #34d399;
+    --v2p-color-accent-400: hsl(var(--v2p-color-foam));
     --v2p-color-accent-500: hsl(var(--v2p-color-foam) / 65%);
     --v2p-color-accent-600: hsl(var(--v2p-color-foam) / 80%);
     --v2p-color-orange-50: hsl(var(--v2p-color-gold) / 10%);
@@ -556,7 +577,7 @@ html.v2p-theme-dawn body,
     --v2p-color-border: hsl(var(--v2p-color-muted) / 20%);
     --v2p-color-input-border: rgb(152 147 165 / 20%);
     --v2p-color-border-darker: hsl(var(--v2p-color-muted) / 40%);
-    --v2p-color-link-visited: hsl(37.89, 18.63%, 60%);
+    --v2p-color-link-visited: var(--v2p-color-foreground);
     --v2p-color-error: #eb6f92;
     --v2p-color-bg-error: #fee2e2;
     --v2p-color-cell-num: hsl(var(--v2p-color-subtle));
@@ -590,11 +611,25 @@ html.v2p-theme-aqua body,
     --v2p-color-pine: 180deg 53% 34%;
     --v2p-color-foam: 195deg 70% 45%;
     --v2p-color-iris: 240deg 50% 60%;
+    /* 水色：补齐中性阶梯，理由同晨光 */
+    --v2p-color-main-50: hsl(var(--v2p-color-surface));
+    --v2p-color-main-100: hsl(var(--v2p-color-overlay) / 55%);
+    --v2p-color-main-200: hsl(var(--v2p-color-muted) / 20%);
+    --v2p-color-main-300: hsl(var(--v2p-color-muted) / 35%);
+    --v2p-color-main-350: hsl(var(--v2p-color-muted) / 45%);
+    --v2p-color-main-400: hsl(var(--v2p-color-muted) / 55%);
+    --v2p-color-main-500: hsl(var(--v2p-color-subtle));
+    --v2p-color-main-600: hsl(var(--v2p-color-subtle));
+    --v2p-color-main-700: hsl(var(--v2p-color-text));
+    --v2p-color-main-800: hsl(var(--v2p-color-text));
+    /* 紫色填充配冷深色字（保证 ≥4.5:1） */
+    --v2p-color-accent-fill: var(--v2p-color-accent-500);
+    --v2p-color-on-accent: #1e293b;
     --v2p-color-accent-50: #ecfdf5;
     --v2p-color-accent-100: hsl(var(--v2p-color-iris) / 20%);
     --v2p-color-accent-200: hsl(var(--v2p-color-iris) / 30%);
     --v2p-color-accent-300: hsl(var(--v2p-color-iris) / 40%);
-    --v2p-color-accent-400: #34d399;
+    --v2p-color-accent-400: hsl(var(--v2p-color-iris));
     --v2p-color-accent-500: hsl(var(--v2p-color-iris) / 65%);
     --v2p-color-accent-600: hsl(var(--v2p-color-iris) / 80%);
     --v2p-color-orange-50: hsl(var(--v2p-color-gold) / 10%);
@@ -1168,7 +1203,7 @@ img[data-v-e7c0fbef] {
 }
 
 .base-button.primary>span[data-v-5a7d79ba] {
-  color: #fff;
+  color: var(--v2p-color-on-accent);
 }
 
 .base-button.gary[data-v-5a7d79ba] {
@@ -1324,9 +1359,8 @@ img[data-v-e7c0fbef] {
 }
 
 .setting-modal .modal-root .body .left .tabs .tab.active[data-v-086214a4] {
-  background: var(--color-active);
-  background: #a7f3d0;
-  color: var(--color-font-pure);
+  background: var(--v2p-color-accent-fill);
+  color: var(--v2p-color-on-accent);
 }
 
 .setting-modal .modal-root .body .left .bottom[data-v-086214a4] {
@@ -3077,8 +3111,8 @@ img[data-v-d39217d8] {
   border-radius: var(--box-border-radius) 0 0 var(--box-border-radius);
   display: flex;
   align-items: center;
-  background: var(--color-active);
-  color: #fff;
+  background: var(--v2p-color-accent-fill);
+  color: var(--v2p-color-on-accent);
   width: 3.6rem;
   font-size: 2.4rem;
   justify-content: center;
@@ -3220,8 +3254,8 @@ img[data-v-d39217d8] {
 }
 
 .NotificationModal .modal-root .modal-body .filter div.active[data-v-77aa374e] {
-  background: var(--color-active);
-  color: #fff;
+  background: var(--v2p-color-accent-fill);
+  color: var(--v2p-color-on-accent);
 }
 
 .NotificationModal .modal-root .modal-body .list-wrap[data-v-77aa374e] {
@@ -3763,12 +3797,12 @@ img {
 }
 
 .calender .days .active[data-v-a73f564c] {
-  background: #40a9ff;
+  background: var(--v2p-color-accent-fill);
   border-radius: 4px;
 }
 
 .calender .days .active a[data-v-a73f564c] {
-  color: #fff !important;
+  color: var(--v2p-color-on-accent) !important;
 }
 
 /* 间距调整：将 V2EX 原生 20px 模块间距覆盖为 5px */
@@ -3796,9 +3830,9 @@ img {
 .post-detail-floating-dock .scroll-to:hover,
 .post-detail-floating-dock .scroll-to:focus-within {
   transform: translateY(-2px) !important;
-  background: var(--v2-primary) !important;
-  color: #ffffff !important;
-  border-color: var(--v2-primary) !important;
+  background: var(--v2p-color-accent-fill) !important;
+  color: var(--v2p-color-on-accent) !important;
+  border-color: var(--v2p-color-accent-fill) !important;
   box-shadow: 0 8px 25px var(--v2-primary-glow) !important;
 }
 
@@ -4119,9 +4153,9 @@ body :is(.topic_content, .reply_content) a[href^="http"]:hover {
 .mod[data-v-6f61a860],
 .mod[data-v-d39217d8],
 .Author .Author-left .mod[data-v-64aa1930] {
-  border: 1px solid var(--v2-primary) !important;
-  background: var(--v2-primary) !important;
-  color: #fff !important;
+  border: 1px solid var(--v2p-color-accent-fill) !important;
+  background: var(--v2p-color-accent-fill) !important;
+  color: var(--v2p-color-on-accent) !important;
   border-radius: 999px !important;
   padding: 1px 8px !important;
   font-size: 11px !important;
@@ -5035,6 +5069,73 @@ html.v2p-privacy-mode #Top .tools a[href^="/member/"]:hover,
 html.v2p-privacy-mode #Top .tools a[href="/notifications"]:hover,
 html.v2p-privacy-mode #Top .tools a[href="/balance"]:hover {
   filter: blur(0) !important;
+}
+
+/* ---------- 深色搜索图标（对齐 v2ex-H5 的处理） ---------- */
+html.v2p-theme-dark-default #search-container::before,
+:root body.v2p-theme-dark-default #search-container::before,
+:root .v2p-theme-dark-default #search-container::before,
+:root[data-darkreader-scheme="dark"] body #search-container::before,
+:root body:has(#Wrapper.Night) #search-container::before {
+  /* 直接反相原生图标：不依赖站内图片资源，镜像站与离线样本都可用 */
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+
+/* ---------- 设置页控件：原生 select 与 Select2（深色下避免白块） ---------- */
+:root form[action="/settings"] :is(select:not(.select2-hidden-accessible), .select2-selection--single),
+:root #Wrapper select:not(.select2-hidden-accessible) {
+  background: var(--v2p-color-bg-input);
+  color: var(--v2p-color-foreground);
+  border: 1px solid var(--v2p-color-input-border);
+}
+:root .select2-container--default .select2-selection--single {
+  background-color: var(--v2p-color-bg-input);
+  border-color: var(--v2p-color-input-border);
+}
+:root .select2-container--default .select2-selection--single .select2-selection__rendered {
+  color: var(--v2p-color-foreground);
+}
+:root .select2-container--default .select2-selection--single .select2-selection__arrow b {
+  border-top-color: var(--v2p-color-font-secondary);
+}
+/* 打开态下拉挂在 body 上，需从 html 反查 */
+:root:has(form[action="/settings"]) body > .select2-container--open :is(.select2-dropdown, .select2-search__field, .select2-results__option--selected, .select2-results__option--highlighted) {
+  background-color: var(--v2p-color-bg-content);
+  color: var(--v2p-color-foreground);
+  border-color: var(--v2p-color-border);
+}
+
+/* ---------- 文本选区（与 v2ex-H5 同步） ---------- */
+:root body::selection {
+  color: var(--v2p-color-selection-foreground);
+  background-color: var(--v2p-color-selection-background);
+}
+:root body img::selection {
+  background-color: var(--v2p-color-selection-background-img);
+}
+
+/* ---------- 窄屏兜底（桌面分屏/小窗口；移动端主体验由 H5 脚本提供） ---------- */
+body {
+  min-width: 0 !important;
+}
+@media screen and (max-width: 840px) {
+  #Main { margin-inline: 0 !important; width: auto !important; min-width: 0 !important; float: none !important; max-width: 100% !important; }
+  /* V2EX 原生 .content 有 min-width:600px，顶栏/主体/底栏都要一并解除 */
+  #Wrapper > .content,
+  #Top .content,
+  #Bottom .content { width: auto !important; min-width: 0 !important; }
+  #Wrapper > .content:has(> #Main) { display: flex; flex-direction: column; }
+  #Rightbar { float: none !important; order: 1; width: auto !important; margin-inline: 0 !important; max-width: 100% !important; }
+  #Leftbar:empty { display: none; }
+}
+@media screen and (max-width: 520px) {
+  #Top { height: auto; }
+  #Top .site-nav { flex-wrap: wrap; gap: 6px; padding-block: 8px; }
+  #Top #search-container { margin-left: 0; flex: 1 1 90px; width: auto; max-width: 245px; }
+  #Wrapper .cell.item td[width="70"] { width: 42px; }
+  #Wrapper .cell.item td[width="48"] { width: 32px; }
+  #Wrapper .cell.item td[width="48"] .avatar { width: 32px !important; }
 }`;
   GM_addStyle(V2Pro_CSS);
 })();
@@ -5151,7 +5252,10 @@ html.v2p-privacy-mode #Top .tools a[href="/balance"]:hover {
       btn.innerHTML = isDark ? MOON_ICON : SUN_ICON;
       btn.setAttribute("aria-pressed", isDark ? "true" : "false");
       btn.title = "主题：" + THEME_INFO[currentMode].label + "（点击切换）";
-      btn.setAttribute("aria-label", "切换主题，当前" + THEME_INFO[currentMode].label);
+      btn.setAttribute(
+        "aria-label",
+        "切换主题，当前" + THEME_INFO[currentMode].label,
+      );
     }
   }
 
@@ -5250,11 +5354,13 @@ html.v2p-privacy-mode #Top .tools a[href="/balance"]:hover {
       (function (mode) {
         var item = document.createElement("div");
         item.className =
-          "v2p-theme-menu-item" +
-          (mode === currentMode ? " active" : "");
+          "v2p-theme-menu-item" + (mode === currentMode ? " active" : "");
         item.setAttribute("data-key", mode);
         item.setAttribute("role", "menuitemradio");
-        item.setAttribute("aria-checked", mode === currentMode ? "true" : "false");
+        item.setAttribute(
+          "aria-checked",
+          mode === currentMode ? "true" : "false",
+        );
         item.innerHTML =
           '<div class="icon">' +
           (mode === currentMode ? "✓" : "") +

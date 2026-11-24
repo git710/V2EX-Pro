@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Pro - H5
 // @namespace    https://github.com/git710/V2EX-Pro
-// @version      1.0.4
+// @version      1.0.5
 // @description  V2EX 网页增强脚本（移动端 H5）：四套主题、回复定位与预览、楼层直达、用户标签、高赞回复、楼中楼优化、表情回复、整页 Base64 解析、节点导航自定义、WebDAV 配置同步、自动签到。须与「V2EX Pro - H5 style」样式脚本一同启用。
 // @description:zh-CN  V2EX 网页增强脚本（移动端 H5）：四套主题、回复定位与预览、楼层直达、用户标签、高赞回复、楼中楼优化、表情回复、整页 Base64 解析、节点导航自定义、WebDAV 配置同步、自动签到。须与「V2EX Pro - H5 style」样式脚本一同启用。
 // @author       git710
@@ -452,7 +452,9 @@
     }
 
     // 兜底方案：从当前页面工具栏或移动端菜单寻找 once
-    const toolsEl = document.querySelector("#Top .tools, #menu-body, header#site-header");
+    const toolsEl = document.querySelector(
+      "#Top .tools, #menu-body, header#site-header",
+    );
     const onceMatch =
       (toolsEl ? toolsEl.innerHTML.match(/once=(\d+)/) : null) ||
       dailyHtml.match(/once=(\d+)/);
@@ -491,7 +493,9 @@
         return;
       }
       // 桌面端模板兼容：首页没有签到入口但已登录，说明今日已在其他端完成签到
-      const qiandaoEntry = document.querySelector('.box .inner a[href="/mission/daily"]');
+      const qiandaoEntry = document.querySelector(
+        '.box .inner a[href="/mission/daily"]',
+      );
       const userBox = document.querySelector("#Rightbar .box .inner");
       if (!qiandaoEntry && userBox) {
         localStorage.setItem(CLOCK_IN_TIME_KEY, timeNow);
@@ -581,7 +585,9 @@
       console.info("[V2EX Pro] " + successMsg);
 
       // 如果当前页面上有签到入口，更新其文字
-      const qiandao = document.querySelector('a[href="/mission/daily"], input[value^="领取"]');
+      const qiandao = document.querySelector(
+        'a[href="/mission/daily"], input[value^="领取"]',
+      );
       if (qiandao) {
         if (qiandao.tagName === "INPUT") {
           qiandao.value = successMsg;
@@ -1153,11 +1159,11 @@ var init_constants = __esm({
       "c4a4a563f698595",
       "81be04b9e4a08ce",
     ];
-      // options 通过 GM_getValue/GM_setValue 持久化（key: v2p_options），
-      // getStorage() 会与 defaultOptions 做深合并；设置页与设置弹窗共用 saveOption。
-      // 自动签到开关不走 options，见 v2p_auto_signin。
-      // isBrowserExtension() 恒为 false 是故意的，别动——postTask()
-      // 靠它区分扩展环境与用户脚本环境。
+    // options 通过 GM_getValue/GM_setValue 持久化（key: v2p_options），
+    // getStorage() 会与 defaultOptions 做深合并；设置页与设置弹窗共用 saveOption。
+    // 自动签到开关不走 options，见 v2p_auto_signin。
+    // isBrowserExtension() 恒为 false 是故意的，别动——postTask()
+    // 靠它区分扩展环境与用户脚本环境。
     defaultOptions = {
       openInNewTab: false,
       openExternalLinkInNewTab: true,
@@ -1335,7 +1341,11 @@ function writePersistedOptions(options) {
 }
 function getStorage(useCache = true) {
   return new Promise((resolve) => {
-    if (typeof window !== "undefined" && useCache && window.__V2P_StorageCache) {
+    if (
+      typeof window !== "undefined" &&
+      useCache &&
+      window.__V2P_StorageCache
+    ) {
       resolve(window.__V2P_StorageCache);
       return;
     }
@@ -1366,10 +1376,7 @@ function getStorageSync() {
 function getOptionValue(options, path) {
   return path
     .split(".")
-    .reduce(
-      (target, key) => (target == null ? void 0 : target[key]),
-      options,
-    );
+    .reduce((target, key) => (target == null ? void 0 : target[key]), options);
 }
 function setOptionValue(options, path, value) {
   const keys = path.split(".");
@@ -1486,8 +1493,7 @@ var init_utils = __esm({
     // 官方域名（*.v2ex.com）与镜像站域名（*.v2ex.co）都算站内，
     // 在镜像站上必须沿用当前 origin，否则 API / 预览请求会跨站打到官网。
     V2EX_ORIGIN =
-      typeof window !== "undefined" &&
-      isV2exHost(window.location.hostname)
+      typeof window !== "undefined" && isV2exHost(window.location.hostname)
         ? window.location.origin
         : "https://www.v2ex.com" /* Origin */;
   },
@@ -2224,9 +2230,7 @@ function pushToast(options) {
   const settings = options || {};
   const message = settings.message;
   const duration = settings.duration === void 0 ? 3e3 : settings.duration;
-  const type = V2P_TOAST_ICONS[settings.type]
-    ? settings.type
-    : "success";
+  const type = V2P_TOAST_ICONS[settings.type] ? settings.type : "success";
 
   const render = () => {
     let container = document.querySelector(".v2p-toasts");
@@ -2783,7 +2787,7 @@ function createModal(props) {
   const $mask = $('<div class="v2p-modal-mask">');
   const $content = $('<div class="v2p-modal-content">');
   const $closeBtn = createButton({
-    children: "\u5173\u95ED<kbd>Esc</kbd>",
+    children: "\u5173\u95ED",
     className: "v2p-modal-close-btn",
   });
   const $title = $(`<div class="v2p-modal-title">${title ?? ""}</div>`);
@@ -3194,8 +3198,9 @@ function isV2exLoggedIn() {
   return !!(
     $('#Top .tools a[href*="/signout"], #Top .tools a[href^="/member/"]')
       .length ||
-    $('#site-header-menu a[href*="/signout"], #site-header-menu a[href^="/member/"]')
-      .length ||
+    $(
+      '#site-header-menu a[href*="/signout"], #site-header-menu a[href^="/member/"]',
+    ).length ||
     $('header#site-header a[href*="/signout"]').length
   );
 }
@@ -3224,9 +3229,7 @@ async function syncMemberTagsFromNotes() {
     const $notesDoc = $("<div>").append($.parseHTML(notesHtml));
     const $tagItem = $notesDoc
       .find(".note_item_title a")
-      .filter((_, link) =>
-        $(link).text().includes(MEMBER_TAGS_NOTE_PREFIX),
-      )
+      .filter((_, link) => $(link).text().includes(MEMBER_TAGS_NOTE_PREFIX))
       .first();
     if ($tagItem.length === 0) {
       memberTagsNoteId = null;
@@ -3289,10 +3292,10 @@ async function persistMemberTags() {
       MEMBER_TAGS_NOTE_PREFIX + JSON.stringify(normalizeMemberTags(memberTags)),
     );
     data.append("syntax", "0");
-    const res = await fetch(
-      `${V2EX_ORIGIN}/notes/edit/${memberTagsNoteId}`,
-      { method: "post", body: data },
-    );
+    const res = await fetch(`${V2EX_ORIGIN}/notes/edit/${memberTagsNoteId}`, {
+      method: "post",
+      body: data,
+    });
     if (!res.redirected || res.status !== 200) {
       throw new Error("写入记事本条目失败");
     }
@@ -3317,9 +3320,7 @@ function updateMemberTag() {
   $(".v2p-member-tag, .v2p-tag-add, .v2p-control-tag").remove();
   if (!isMemberTagsEnabled()) return;
   if (typeof $topicHeader !== "undefined" && $topicHeader?.length) {
-    const $opLink = $topicHeader
-      .find('small a[href^="/member/"]')
-      .first();
+    const $opLink = $topicHeader.find('small a[href^="/member/"]').first();
     const opName = $opLink.text().trim();
     if (opName) {
       const tags = getMemberTags(opName);
@@ -3570,9 +3571,7 @@ function getLikeSpan($scope) {
     (_, el) => $(el).find('img[alt="❤️"]').length > 0,
   );
   if ($withHeart.length > 0) return $withHeart.first();
-  return $spans
-    .filter((_, el) => /^\s*\d+\s*$/.test($(el).text()))
-    .first();
+  return $spans.filter((_, el) => /^\s*\d+\s*$/.test($(el).text())).first();
 }
 // 桌面版回复时间是 .ago；移动版是 span.fade.small（不含红心图标）。
 // 统一取回复时间节点，供「隐藏回复时间」和感谢后插入赞数节点复用。
@@ -3724,8 +3723,7 @@ function handleNestedComment({
                 .slice(0, j)
                 .findIndex(
                   (data) =>
-                    data.floor === firstRefFloor &&
-                    data.memberName === refName,
+                    data.floor === firstRefFloor && data.memberName === refName,
                 );
               if (targetIdx >= 0) {
                 refCommentIdx = targetIdx;
@@ -4064,18 +4062,14 @@ function bindReplyReferenceJump() {
       if (!name) return;
       const $cell = $(this).closest('.cell[id^="r_"]');
       const cellId = $cell.attr("id");
-      const dataIndex = commentDataList.findIndex(
-        (item) => item.id === cellId,
-      );
+      const dataIndex = commentDataList.findIndex((item) => item.id === cellId);
       if (dataIndex < 0) return;
       const current = commentDataList[dataIndex];
       const links = $cell.find(".reply_content a[href^='/member/']").toArray();
       let floor = getFloorAfterMemberLink($cell, this);
       if (!floor && links.length === 1) {
         floor =
-          Number(current.replyFloor) ||
-          Number(current.refFloors?.[0]) ||
-          0;
+          Number(current.replyFloor) || Number(current.refFloors?.[0]) || 0;
       }
       if (floor > 0) {
         ev.preventDefault();
@@ -5861,9 +5855,9 @@ function createPopup(props) {
       .catch(() => {
         handlePopupClose();
         createToast({
-    message: "Popup \u6E32\u67D3\u5931\u8D25",
-    type: "error",
-  });
+          message: "Popup \u6E32\u67D3\u5931\u8D25",
+          type: "error",
+        });
       });
     onOpen?.();
   };
@@ -6129,11 +6123,9 @@ function findTopReplyChildren(item, endList, all, topReplyList) {
       }
     }
   }
-  floorReplyList.reverse().forEach(
-    ({ currentItem, endList: childEndList }) => {
-      attach(currentItem, childEndList, item);
-    },
-  );
+  floorReplyList.reverse().forEach(({ currentItem, endList: childEndList }) => {
+    attach(currentItem, childEndList, item);
+  });
   const nextMeIndex = endList.findIndex((v) => {
     return (
       v.username === item.username &&
@@ -6421,9 +6413,7 @@ async function collectTopicReplies({ options, commentDataList }) {
         return { i: page, replyList: toTopReplyItems(pageData, page) };
       },
     );
-    const fulfilled = results.filter(
-      (result) => result.status === "fulfilled",
-    );
+    const fulfilled = results.filter((result) => result.status === "fulfilled");
     fulfilled.forEach((result) => repliesMap.push(result.value));
     failedPageCount = selection.fetchPages.length - fulfilled.length;
   }
@@ -6646,7 +6636,9 @@ async function handleTopReplies({ options, commentDataList }) {
     $box.find(".v2p-top-reply-toggle").text(collapsed ? "展开" : "收起");
   });
   // 副本里的感谢按钮：已感谢过的不再绑定，避免重复弹确认框
-  $box.find(".v2p-control-thank:not(.v2p-thanked)").on("click", onThankControlClick);
+  $box
+    .find(".v2p-control-thank:not(.v2p-thanked)")
+    .on("click", onThankControlClick);
   const jumpFrom = (target) => {
     const $target = $(target);
     jumpToCommentCell($target.attr("data-id"), $target.attr("data-page"));
@@ -6803,9 +6795,7 @@ async function handleComments() {
             `<div class="badge ${memberName === topicOwnerName ? "mod" : "you"}">YOU</div>`,
           );
       }
-      const $cellBody = $cellDom.find(
-        "> table > tbody > tr > td:nth-child(3)",
-      );
+      const $cellBody = $cellDom.find("> table > tbody > tr > td:nth-child(3)");
       const $likesBox = getLikeSpan($cellBody).addClass("v2p-likes-box");
       $likesBox
         .find('img[alt="\u2764\uFE0F"]')
@@ -7450,6 +7440,61 @@ function openTestMessageModal() {
 }
 window.v2pOpenTestMessageModal = openTestMessageModal;
 
+function renderThemeSettingItem($container) {
+  $container.empty();
+  const current =
+    (typeof window.v2pGetTheme === "function"
+      ? window.v2pGetTheme()
+      : localStorage.getItem("user_preferred_theme_mode")) || "aqua";
+  const themes = [
+    { key: "light", label: "浅色" },
+    { key: "dawn", label: "晨光" },
+    { key: "aqua", label: "水色" },
+    { key: "dark", label: "深色" },
+    { key: "auto", label: "跟随系统" },
+  ];
+  const $group = $('<div class="v2p-settings-group v2p-theme-setting-group">');
+  $group.append($('<div class="v2p-settings-group-title">').text("外观主题"));
+  const $radios = $('<div class="v2p-theme-radios">');
+  themes.forEach(({ key, label }) => {
+    const $btn = $('<div class="v2p-theme-radio">')
+      .text(label)
+      .toggleClass("active", current === key)
+      .attr("data-theme-key", key);
+    $btn.on("click", () => {
+      $radios.find(".v2p-theme-radio").removeClass("active");
+      $btn.addClass("active");
+      if (typeof window.v2pSetTheme === "function") {
+        window.v2pSetTheme(key);
+      } else {
+        try {
+          localStorage.setItem("user_preferred_theme_mode", key);
+        } catch (e) {}
+        window.dispatchEvent(
+          new CustomEvent("v2p-change-theme", { detail: { mode: key } }),
+        );
+      }
+    });
+    $radios.append($btn);
+  });
+  $group.append($radios);
+  $group.append(
+    $('<div class="v2p-settings-note">').text(
+      "支持浅色、晨光、水色、深色四套主题与系统自动跟随；点击即时切换",
+    ),
+  );
+  $container.append($group);
+
+  window.addEventListener("v2p-theme-change", (e) => {
+    if (e && e.detail && e.detail.mode) {
+      $radios.find(".v2p-theme-radio").each((_, el) => {
+        const $el = $(el);
+        $el.toggleClass("active", $el.attr("data-theme-key") === e.detail.mode);
+      });
+    }
+  });
+}
+
 function renderOptionSettings($container, options) {
   $container.empty();
   OPTION_SETTING_GROUPS.forEach((group) => {
@@ -7461,12 +7506,12 @@ function renderOptionSettings($container, options) {
       const value = getOptionValue(options, item.path);
       const $row = $('<div class="v2p-settings-row">');
       if (item.type === "checkbox") {
-        const $label = $('<label>');
+        const $label = $("<label>");
         $label.append(
           $('<input type="checkbox">')
             .attr("data-option", item.path)
             .prop("checked", !!value),
-          $('<span>').text(item.label),
+          $("<span>").text(item.label),
         );
         $row.append($label);
       } else if (item.type === "number") {
@@ -7486,9 +7531,9 @@ function renderOptionSettings($container, options) {
         $row.append(
           $('<span class="v2p-settings-row-label">').text(item.label),
         );
-        const $select = $('<select>').attr("data-option", item.path);
+        const $select = $("<select>").attr("data-option", item.path);
         item.options.forEach(([optionValue, optionLabel]) => {
-          $select.append($('<option>').val(optionValue).text(optionLabel));
+          $select.append($("<option>").val(optionValue).text(optionLabel));
         });
         $select.val(String(value));
         $row.append($select);
@@ -7499,19 +7544,19 @@ function renderOptionSettings($container, options) {
   });
   // 调试与测试（默认隐藏，DOM 中保留，可通过修改 CSS display 展开）
   const $testGroup = $(
-    '<div class="v2p-settings-group v2p-debug-test-group" id="v2p-debug-test-group" style="display: none;">'
+    '<div class="v2p-settings-group v2p-debug-test-group" id="v2p-debug-test-group" style="display: none;">',
   );
   $testGroup.append(
-    $('<div class="v2p-settings-group-title">').text("调试与测试")
+    $('<div class="v2p-settings-group-title">').text("调试与测试"),
   );
   const $testRow = $(
-    '<div class="v2p-settings-row v2p-settings-test-row" style="justify-content: flex-start; gap: 10px; flex-wrap: wrap; padding-top: 6px; border-top: 0;">'
+    '<div class="v2p-settings-row v2p-settings-test-row" style="justify-content: flex-start; gap: 10px; flex-wrap: wrap; padding-top: 6px; border-top: 0;">',
   );
   const $testModalBtn = $(
-    '<button type="button" class="normal button v2p-test-modal-btn" style="cursor: pointer;">'
+    '<button type="button" class="normal button v2p-test-modal-btn" style="cursor: pointer;">',
   ).text("测试弹出消息弹框");
   const $testToastBtn = $(
-    '<button type="button" class="normal button v2p-test-toast-btn" style="cursor: pointer;">'
+    '<button type="button" class="normal button v2p-test-toast-btn" style="cursor: pointer;">',
   ).text("测试 Toast 提示");
 
   $testModalBtn.on("click", (ev) => {
@@ -7555,9 +7600,7 @@ function renderOptionSettings($container, options) {
     applyLiveOption(path, value);
     createToast({
       message:
-        item?.live === true
-          ? "设置已保存"
-          : "设置已保存，刷新页面后生效",
+        item?.live === true ? "设置已保存" : "设置已保存，刷新页面后生效",
       type: "success",
     });
   });
@@ -7572,6 +7615,7 @@ function handleSettingsModal() {
     onMount({ $content }) {
       $content.append(`
         <div class="v2p-settings-panel">
+        <div id="v2p-modal-theme"></div>
         <div class="v2p-settings-item">
           <label>
             <input type="checkbox" id="v2p-modal-signin">
@@ -7580,11 +7624,12 @@ function handleSettingsModal() {
         </div>
         <div class="v2p-settings-options" id="v2p-modal-options"></div>
         <div class="v2p-settings-tip">
-          主题、WebDAV 同步等完整设置见
+          WebDAV 同步等完整设置见
           <a href="/settings#v2p">V2EX 设置页的「V2EX Pro」标签</a>。
         </div>
         </div>
       `);
+      renderThemeSettingItem($content.find("#v2p-modal-theme"));
       $content.find("#v2p-modal-signin").on("change", function () {
         window.v2pApplyAutoSignin?.(this.checked);
       });
@@ -7597,6 +7642,14 @@ function handleSettingsModal() {
     },
     onOpen({ $content }) {
       // 每次打开都按当前存储状态刷新，避免与设置页的操作不同步
+      const curMode =
+        (typeof window.v2pGetTheme === "function"
+          ? window.v2pGetTheme()
+          : localStorage.getItem("user_preferred_theme_mode")) || "aqua";
+      $content.find(".v2p-theme-radio").each((_, el) => {
+        const $el = $(el);
+        $el.toggleClass("active", $el.attr("data-theme-key") === curMode);
+      });
       $content
         .find("#v2p-modal-signin")
         .prop("checked", window.v2pGetAutoSignin?.() ?? false);
@@ -7687,6 +7740,7 @@ function handleTools() {
     const $moreTool = $tools.find(".v2p-tool-more");
     const $toolContent = $(`
       <div class="v2p-select-dropdown">
+        <div class="v2p-select-item v2p-tool-theme-toggle">\u5916\u89C2\u4E3B\u9898\u8BBE\u7F6E</div>
         <div class="v2p-select-item v2p-reply-tool-floor">\u697C\u5C42\u76F4\u8FBE</div>
         <div class="v2p-select-item v2p-reply-tool-decode">\u89E3\u6790\u672C\u9875 Base64</div>
         <div class="v2p-select-item v2p-reply-tool-encode">\u6587\u672C\u8F6C Base64</div>
@@ -7697,6 +7751,16 @@ function handleTools() {
       trigger: $moreTool,
       content: $toolContent,
       offsetOptions: { mainAxis: 5, crossAxis: -5 },
+    });
+    $toolContent.find(".v2p-tool-theme-toggle").on("click", () => {
+      const $toggle = $(".v2p-color-mode-toggle").first();
+      if ($toggle.length) {
+        $toggle[0].dispatchEvent(
+          new MouseEvent("click", { bubbles: true, cancelable: true }),
+        );
+      } else {
+        settingsModal.open();
+      }
     });
     $toolContent.find(".v2p-reply-tool-floor").on("click", () => {
       const $input = $(".v2p-floor-jump-input").first();
@@ -9307,6 +9371,10 @@ runAfterLoaded(() => {
     settingsContent.id = "v2p-settings-panel";
     settingsContent.style.display = "none";
     settingsContent.innerHTML = `
+      <div class="cell">外观主题</div>
+      <div class="inner">
+        <div id="v2p-settings-theme"></div>
+      </div>
       <div class="cell">阅读与回复</div>
       <div class="inner">
         <div id="v2p-settings-options"></div>
@@ -9358,6 +9426,9 @@ runAfterLoaded(() => {
       </div>
     `;
     navCell.insertAdjacentElement("afterend", settingsContent);
+    renderThemeSettingItem(
+      $(settingsContent.querySelector("#v2p-settings-theme")),
+    );
     renderOptionSettings(
       $(settingsContent.querySelector("#v2p-settings-options")),
       storage.options,
@@ -9611,7 +9682,8 @@ runAfterLoaded(() => {
 
       if (direction !== 0 && imgEl.src && imgEl.style.opacity !== "0") {
         const exitOffset = direction > 0 ? -50 : 50;
-        imgEl.style.transition = "transform 0.12s ease-in, opacity 0.12s ease-in";
+        imgEl.style.transition =
+          "transform 0.12s ease-in, opacity 0.12s ease-in";
         imgEl.style.transform = `translate3d(${exitOffset}px, 0, 0) scale(0.96)`;
         imgEl.style.opacity = "0";
       }
@@ -9644,10 +9716,20 @@ runAfterLoaded(() => {
 
     function isEligibleImage(img) {
       if (!img || img.tagName !== "IMG") return false;
-      if (img.classList.contains("avatar") || (img.closest && img.closest(".avatar"))) return false;
-      if (img.closest && img.closest(".emoticon-pack, .emoji, [data-emoji]")) return false;
+      if (
+        img.classList.contains("avatar") ||
+        (img.closest && img.closest(".avatar"))
+      )
+        return false;
+      if (img.closest && img.closest(".emoticon-pack, .emoji, [data-emoji]"))
+        return false;
       if (!img.closest || !img.closest(IMAGE_PARENT_SELECTORS)) return false;
-      if (img.naturalWidth > 0 && img.naturalWidth <= 32 && img.naturalHeight > 0 && img.naturalHeight <= 32) {
+      if (
+        img.naturalWidth > 0 &&
+        img.naturalWidth <= 32 &&
+        img.naturalHeight > 0 &&
+        img.naturalHeight <= 32
+      ) {
         return false;
       }
       return true;
@@ -9657,18 +9739,25 @@ runAfterLoaded(() => {
       const parentA = img.closest ? img.closest("a") : null;
       if (parentA && parentA.href) {
         const href = parentA.href.trim();
-        if (/\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(href) || href.includes("imgur.com")) {
+        if (
+          /\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(href) ||
+          href.includes("imgur.com")
+        ) {
           return { src: href, originHref: href };
         }
       }
-      const originUrl = img.getAttribute("originUrl") || (img.dataset ? img.dataset.origin : "");
+      const originUrl =
+        img.getAttribute("originUrl") ||
+        (img.dataset ? img.dataset.origin : "");
       const src = originUrl || img.currentSrc || img.src;
       return { src, originHref: parentA ? parentA.href : src };
     }
 
     function collectGallery(clickedImg) {
       const scope = document.querySelector("#Main") || document;
-      const imgs = Array.from(scope.querySelectorAll(IMAGE_PARENT_SELECTORS + " img")).filter(isEligibleImage);
+      const imgs = Array.from(
+        scope.querySelectorAll(IMAGE_PARENT_SELECTORS + " img"),
+      ).filter(isEligibleImage);
       const uniqueImgs = [];
       const seen = new Set();
       imgs.forEach((img) => {
@@ -9676,7 +9765,11 @@ runAfterLoaded(() => {
           seen.add(img);
           const resolved = resolveOriginalSrc(img);
           if (resolved.src) {
-            uniqueImgs.push({ img, src: resolved.src, originHref: resolved.originHref });
+            uniqueImgs.push({
+              img,
+              src: resolved.src,
+              originHref: resolved.originHref,
+            });
           }
         }
       });
@@ -9684,7 +9777,11 @@ runAfterLoaded(() => {
       let idx = uniqueImgs.findIndex((item) => item.img === clickedImg);
       if (idx === -1) {
         const fallback = resolveOriginalSrc(clickedImg);
-        uniqueImgs.unshift({ img: clickedImg, src: fallback.src, originHref: fallback.originHref });
+        uniqueImgs.unshift({
+          img: clickedImg,
+          src: fallback.src,
+          originHref: fallback.originHref,
+        });
         idx = 0;
       }
       return { list: uniqueImgs, index: idx };
@@ -9833,7 +9930,12 @@ runAfterLoaded(() => {
       function (e) {
         const target = e.target;
         if (!target) return;
-        const img = target.tagName === "IMG" ? target : (target.closest ? target.closest("img") : null);
+        const img =
+          target.tagName === "IMG"
+            ? target
+            : target.closest
+              ? target.closest("img")
+              : null;
         if (!isEligibleImage(img)) return;
 
         e.preventDefault();
