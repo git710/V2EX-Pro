@@ -5154,6 +5154,17 @@ html.Night #site-header-logo #LogoMobile {
     color: var(--v2p-color-font-primary);
 }
 
+/* 移动端顶栏：主题按钮与头像始终并排，避免窄屏把头像挤到下一行或垂直错位 */
+.v2p-mobile #site-header #site-header-menu:has(.v2p-header-theme-toggle) {
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+}
+.v2p-header-theme-toggle {
+    flex: 0 0 auto;
+}
+
 /* ===== Hallmark v3.5.3 系统化重整：与 v2ex-PC 同系统（蓝锚点 hue 262，OKLCH）=====
    策略延续：尾部集中覆盖，不删上游代码，删本段即回滚。
    dawn / aqua 自选主题不在本段覆盖范围内 —— 焦点环等取 var(--v2p-color-accent-500)，
