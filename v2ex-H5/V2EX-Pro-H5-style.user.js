@@ -517,11 +517,11 @@ html.v2p-theme-dark-default body #search-container #search-result {
     --v2p-color-error: #ef4444;
     --v2p-color-bg-error: #fee2e2;
     --v2p-color-cell-num: var(--v2p-color-main-350);
-    --v2p-box-shadow: 0 3px 5px 0 rgb(0 0 0 / 4%);
-    --v2p-widget-shadow: 0 9px 24px -3px rgb(0 0 0 / 6%),
-        0 4px 8px -1px rgb(0 0 0 /12%);
-    --v2p-toast-shadow: 0 6px 16px 0 rgb(0 0 0 / 8%),
-        0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%);
+    --v2p-box-shadow: 0 1px 3px 0 rgb(0 0 0 / 4%), 0 1px 2px -1px rgb(0 0 0 / 4%);
+    --v2p-widget-shadow: 0 10px 28px -4px rgb(0 0 0 / 12%),
+        0 4px 10px -2px rgb(0 0 0 / 6%);
+    --v2p-toast-shadow: 0 8px 24px 0 rgb(0 0 0 / 8%),
+        0 4px 8px -2px rgb(0 0 0 / 6%);
     --color-fade: var(--v2p-color-font-secondary);
     --color-gray: var(--v2p-color-font-secondary);
     --link-color: var(--v2p-color-foreground);
@@ -614,11 +614,11 @@ html.v2p-theme-dark-default body #search-container #search-result {
     --v2p-color-error: #ef4444;
     --v2p-color-bg-error: #fee2e2;
     --v2p-color-cell-num: var(--v2p-color-main-350);
-    --v2p-box-shadow: 0 3px 5px 0 rgb(0 0 0 / 4%);
-    --v2p-widget-shadow: 0 9px 24px -3px rgb(0 0 0 / 6%),
-        0 4px 8px -1px rgb(0 0 0 /12%);
-    --v2p-toast-shadow: 0 6px 16px 0 rgb(0 0 0 / 8%),
-        0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%);
+    --v2p-box-shadow: 0 1px 3px 0 rgb(0 0 0 / 4%), 0 1px 2px -1px rgb(0 0 0 / 4%);
+    --v2p-widget-shadow: 0 10px 28px -4px rgb(0 0 0 / 12%),
+        0 4px 10px -2px rgb(0 0 0 / 6%);
+    --v2p-toast-shadow: 0 8px 24px 0 rgb(0 0 0 / 8%),
+        0 4px 8px -2px rgb(0 0 0 / 6%);
     --color-fade: var(--v2p-color-font-secondary);
     --color-gray: var(--v2p-color-font-secondary);
     --link-color: var(--v2p-color-foreground);
@@ -713,7 +713,7 @@ body #Wrapper .content {
 
     gap: var(--v2p-layout-column-gap);
 }
-//* Logo样式 */
+/* Logo样式 */
 #LogoMobile {
 background-image: inherit;
 width: 130px !important;
@@ -2419,8 +2419,9 @@ html.v2p-theme-dark-default body,
     --v2p-color-input-border: #444c56;
     --v2p-color-border-darker: #444c56;
     --v2p-color-scrollbar: #4a4d54;
-    --v2p-box-shadow: 0 3px 5px 0 rgb(0 0 0 / 10%);
-    --v2p-toast-shadow: none;
+    --v2p-box-shadow: 0 1px 3px 0 rgb(0 0 0 / 25%), 0 1px 2px -1px rgb(0 0 0 / 20%);
+    --v2p-widget-shadow: 0 14px 36px -4px rgb(0 0 0 / 45%), 0 6px 16px -2px rgb(0 0 0 / 30%);
+    --v2p-toast-shadow: 0 8px 24px 0 rgb(0 0 0 / 40%), 0 4px 8px -2px rgb(0 0 0 / 30%);
     --link-color: var(--v2p-color-foreground);
     --link-visited-color:var(--v2p-color-foreground);
     --box-background-alt-color: var(--v2p-color-main-100);
@@ -2767,11 +2768,11 @@ html.v2p-theme-dawn body,
     --v2p-color-bg-error: #fee2e2;
 
     --v2p-color-cell-num: hsl(var(--v2p-color-subtle));
-    --v2p-box-shadow: 0 3px 5px 0 rgb(0 0 0 / 4%);
-    --v2p-widget-shadow: 0 9px 24px -3px rgb(0 0 0 / 6%),
-        0 4px 8px -1px rgb(0 0 0 /12%);
-    --v2p-toast-shadow: 0 6px 16px 0 rgb(0 0 0 / 8%),
-        0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%);
+    --v2p-box-shadow: 0 1px 3px 0 rgb(0 0 0 / 4%), 0 1px 2px -1px rgb(0 0 0 / 4%);
+    --v2p-widget-shadow: 0 10px 28px -4px rgb(0 0 0 / 12%),
+        0 4px 10px -2px rgb(0 0 0 / 6%);
+    --v2p-toast-shadow: 0 8px 24px 0 rgb(0 0 0 / 8%),
+        0 4px 8px -2px rgb(0 0 0 / 6%);
     --link-color: var(--v2p-color-foreground);
     --link-visited-color:var(--v2p-color-foreground);
     --box-background-alt-color: var(--v2p-color-bg-block);
@@ -2889,10 +2890,11 @@ html.v2p-theme-aqua body,
     --v2p-color-error: #eb6f92;
     --v2p-color-bg-error: #fee2e2;
     --v2p-color-cell-num: hsl(var(--v2p-color-subtle));
-    --v2p-box-shadow: 0 1px 2px 0 rgb(0 0 0 / 6%), 0 1px 3px 0 rgb(0 0 0 / 4%); /* 调整为更轻的阴影 */
-    --v2p-widget-shadow: 0 6px 16px -3px rgb(0 0 0 / 4%),
-        0 2px 4px -1px rgb(0 0 0 /8%); /* 调整为更轻的阴影 */
-    --v2p-toast-shadow: var(--v2p-widget-shadow);
+    --v2p-box-shadow: 0 1px 3px 0 rgb(15 45 60 / 5%), 0 1px 2px -1px rgb(15 45 60 / 4%);
+    --v2p-widget-shadow: 0 10px 28px -4px rgb(15 45 60 / 10%),
+        0 4px 10px -2px rgb(15 45 60 / 6%);
+    --v2p-toast-shadow: 0 8px 24px 0 rgb(15 45 60 / 8%),
+        0 4px 8px -2px rgb(15 45 60 / 5%);
 
     /* --- 别名 (使用 Accent Color Blue) --- */
     --link-color: #394d65; /* 链接使用蓝色 */
@@ -5121,7 +5123,9 @@ html.Night #site-header-logo #LogoMobile {
     background: var(--v2p-color-bg-subtle, rgba(0, 0, 0, 0.04));
     color: var(--v2p-color-font-secondary);
     border: 1px solid var(--v2p-color-divider, rgba(0, 0, 0, 0.08));
-    transition: all 0.15s ease;
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 0.15s;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
 }
 .v2p-theme-radio:hover {
@@ -5193,16 +5197,159 @@ html, body { overflow-x: clip; }
     font-family: var(--v2-font-mono);
 }
 
-/* 数字对齐：楼层 / 回复数 / 计数用等宽数字 */
-.fr, .cell .fr a, .count_livid, .count_orange {
+/* 数字对齐：楼层 / 回复数 / 计数 / 时间用等宽数字 */
+.fr,
+.cell .fr a,
+.count_livid,
+.count_orange,
+.no,
+.ago,
+.snow,
+.page_current,
+.page_normal,
+.balance_area,
+#money,
+.v2p-image-viewer-counter,
+.v2p-image-viewer-scale-text,
+.v2p-member-card-no {
     font-variant-numeric: tabular-nums;
 }
 
+/* 标题与正文排印层级（严格遵循 3-size 视觉层级体系与适宜阅读行距） */
+#Main .cell .item_title .topic-link,
+.header h1 {
+    letter-spacing: -0.012em;
+    line-height: 1.45 !important;
+}
+
+.topic_content {
+    font-size: 15px !important;
+    line-height: 1.75 !important;
+    letter-spacing: 0.01em;
+}
+
+.topic_content p {
+    margin-block: 0.85em !important;
+}
+
+.reply_content {
+    font-size: 14.5px !important;
+    line-height: 1.68 !important;
+}
+
+/* 现代引用样式：温和左强调线 + 浅背景衬底 */
+.topic_content blockquote,
+.reply_content blockquote {
+    border-left: 3.5px solid var(--v2p-color-accent-500) !important;
+    background: color-mix(in oklch, var(--v2p-color-accent-500) 8%, transparent) !important;
+    padding: 0.75rem 1.25rem !important;
+    border-radius: 0 6px 6px 0 !important;
+    color: var(--v2p-color-font-secondary) !important;
+    margin: 1rem 0 !important;
+}
+
+/* 代码块：细边框与柔和底色，防止溢出撑出横向滚动条，支持触控滑动 */
+.topic_content pre,
+.reply_content pre {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border: 1px solid var(--v2p-color-border) !important;
+    background: var(--v2p-color-main-100) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    line-height: 1.6 !important;
+    font-size: 13px !important;
+}
+
+.topic_content :not(pre) > code,
+.reply_content :not(pre) > code {
+    background: var(--v2p-color-main-100) !important;
+    border: 1px solid var(--v2p-color-border) !important;
+    border-radius: 4px !important;
+    padding: 2px 6px !important;
+    font-size: 0.88em !important;
+}
+
+/* Markdown 表格移动端防撑爆排印 */
+.topic_content table,
+.reply_content table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-collapse: collapse;
+    border: 1px solid var(--v2p-color-border);
+    border-radius: 6px;
+    margin: 1rem 0;
+}
+
+.topic_content table th,
+.reply_content table th {
+    background: var(--v2p-color-main-100);
+    color: var(--v2p-color-foreground);
+    font-weight: 600;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--v2p-color-border);
+    text-align: left;
+}
+
+.topic_content table td,
+.reply_content table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--v2p-color-divider);
+    color: var(--v2p-color-foreground);
+}
+
 /* 焦点环：即时出现（无过渡），颜色随主题 accent 自适应 */
-a:focus-visible, button:focus-visible, input:focus-visible,
-.tab:focus-visible, .page_normal:focus-visible {
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible,
+.tab:focus-visible, .page_normal:focus-visible, .page_current:focus-visible {
     outline: 2px solid var(--v2p-color-accent-500);
     outline-offset: 2px;
+}
+
+/* 移动端安全区与可触控区域优化（满足 44px 触控可达性规范） */
+.v2p-mobile #Top {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+}
+
+.v2p-mobile #reply-box,
+.v2p-mobile .v2p-tools-bar,
+.v2p-mobile .v2p-bottom-bar {
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)) !important;
+}
+
+/* 移动端横向 Tab 滚动流畅度与无缝胶囊 */
+.v2p-mobile #Main #Tabs,
+.v2p-mobile #Tabs {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.v2p-mobile #Main #Tabs::-webkit-scrollbar,
+.v2p-mobile #Tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* 触控交互目标面积与手势反馈 */
+.v2p-mobile .tab,
+.v2p-mobile .page_normal,
+.v2p-mobile .page_current,
+.v2p-mobile .v2p-color-mode-toggle,
+.v2p-mobile .v2p-hover-btn {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 移动端按压反馈微动效 */
+.v2p-mobile .tab:active,
+.v2p-mobile .page_normal:active,
+.v2p-mobile .page_current:active,
+.v2p-mobile .v2p-hover-btn:active {
+    transform: scale(0.96);
+    transition-duration: 80ms !important;
 }
 
 /* hover-only 修复：触屏 / 键盘经 focus-within 同样可达（原仅 row:hover 显示） */

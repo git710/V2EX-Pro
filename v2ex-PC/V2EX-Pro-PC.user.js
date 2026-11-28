@@ -945,7 +945,10 @@
           const a =
             e2.target && e2.target.closest && e2.target.closest("a[href]");
           if (!a || a.getAttribute("script")) return;
-          if (!window.config || window.config.openExternalLinkInNewTab === false)
+          if (
+            !window.config ||
+            window.config.openExternalLinkInNewTab === false
+          )
             return;
           const href = a.href;
           if (!functions.isExternalLink(href)) return;
@@ -13877,7 +13880,9 @@
         color: var(--v2-primary) !important;
         text-underline-offset: 4px !important;
         text-decoration: underline 1.5px rgba(37, 99, 235, 0.35) !important;
-        transition: all 0.18s ease;
+        transition-property: color, text-decoration-color, background-color;
+        transition-duration: 0.18s;
+        transition-timing-function: ease;
       }
       body :is(.topic_content, .reply_content) a[href^=http]:hover {
         text-decoration-color: var(--v2-primary) !important;
@@ -13911,18 +13916,20 @@
       }
 
       /* ---------- 3. 宿主页面元素现代重塑 (Top, Wrapper, Main, Rightbar) ---------- */
-      /* 顶栏毛玻璃与悬浮感知 */
+      /* 顶栏毛玻璃与悬浮感知：使用主题 Token 保证 4 主题皆完美融合 */
       #Top {
-        background: rgba(255, 255, 255, 0.88) !important;
+        background: rgba(var(--v2p-color-bg-content-rgb, 255, 255, 255), 0.88) !important;
         backdrop-filter: blur(16px) saturate(180%) !important;
         -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+        border-bottom: 1px solid var(--v2p-color-border) !important;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03) !important;
-        transition: all 0.25s ease;
+        transition-property: background-color, border-color, box-shadow;
+        transition-duration: 0.22s;
+        transition-timing-function: var(--v2-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
       }
       html.dark #Top, .Night #Top {
-        background: rgba(19, 29, 46, 0.88) !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+        background: rgba(var(--v2p-color-bg-content-rgb, 34, 39, 46), 0.88) !important;
+        border-bottom: 1px solid var(--v2p-color-border) !important;
         box-shadow: 0 2px 16px rgba(0, 0, 0, 0.35) !important;
       }
 
@@ -13935,7 +13942,9 @@
         padding: 0 1.4rem !important;
         height: 2.8rem !important;
         font-size: 1.25rem !important;
-        transition: all 0.2s ease !important;
+        transition-property: border-color, box-shadow, background-color;
+        transition-duration: 0.18s;
+        transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
       }
       #q:focus {
@@ -13989,7 +13998,9 @@
         padding: 0.5rem 1.1rem !important;
         font-size: 1.3rem !important;
         font-weight: 500 !important;
-        transition: all 0.18s ease !important;
+        transition-property: background-color, color, box-shadow, transform;
+        transition-duration: 0.16s;
+        transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
         display: inline-flex !important;
         align-items: center !important;
       }
@@ -14015,7 +14026,10 @@
         padding: 0.5rem 1rem !important;
         font-size: 1.25rem !important;
         margin: 0 2px !important;
-        transition: all 0.18s ease !important;
+        font-variant-numeric: tabular-nums;
+        transition-property: background-color, border-color, color, box-shadow;
+        transition-duration: 0.16s;
+        transition-timing-function: ease !important;
         border: 1px solid var(--color-line) !important;
       }
       .page_normal {
@@ -14086,7 +14100,9 @@
         font-size: 1.15rem !important;
         font-weight: 550 !important;
         text-decoration: none !important;
-        transition: all 0.18s ease !important;
+        transition-property: background-color, color, border-color;
+        transition-duration: 0.18s;
+        transition-timing-function: ease !important;
         display: inline-block;
         border: 1px solid transparent;
       }
@@ -14104,7 +14120,9 @@
         border-radius: 999px !important;
         background: var(--color-floor) !important;
         color: var(--color-font) !important;
-        transition: all 0.2s var(--ease-spring) !important;
+        transition-property: background-color, color, transform, box-shadow;
+        transition-duration: 0.2s;
+        transition-timing-function: var(--ease-spring) !important;
         display: inline-block !important;
         line-height: 1.5 !important;
         font-family: var(--v2-font-mono) !important;
@@ -14134,7 +14152,9 @@
         border: 1px solid var(--color-line) !important;
         border-radius: var(--box-border-radius) !important;
         cursor: pointer;
-        transition: all 0.22s ease !important;
+        transition-property: border-color, box-shadow, transform, background-color;
+        transition-duration: 0.2s;
+        transition-timing-function: ease !important;
         background: var(--color-second-bg) !important;
         padding: 1.2rem 1.4rem !important;
         box-shadow: var(--box-card-shadow) !important;
@@ -14325,7 +14345,9 @@
         border-radius: 6px !important;
         height: 2.6rem !important;
         padding: 0 0.7rem !important;
-        transition: all 0.18s ease !important;
+        transition-property: background-color, color;
+        transition-duration: 0.18s;
+        transition-timing-function: ease !important;
       }
       .tool:hover {
         background: var(--v2-primary-light) !important;
@@ -14456,7 +14478,9 @@
         color: var(--color-font-3) !important;
         cursor: pointer !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
-        transition: all 0.22s var(--ease-spring) !important;
+        transition-property: background-color, border-color, color, transform, box-shadow;
+        transition-duration: 0.2s;
+        transition-timing-function: var(--ease-spring) !important;
         transform: none !important;
         position: static !important;
       }
@@ -14511,7 +14535,9 @@
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
         backdrop-filter: blur(14px) saturate(180%) !important;
         -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
-        transition: all 0.22s var(--ease-spring) !important;
+        transition-property: background-color, border-color, color, transform, box-shadow;
+        transition-duration: 0.2s;
+        transition-timing-function: var(--ease-spring) !important;
         transform: none !important;
         bottom: auto !important;
         padding: 0 !important;
@@ -14576,7 +14602,9 @@
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18) !important;
         opacity: 0 !important;
         pointer-events: none !important;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        transition-property: opacity, transform, border-color, box-shadow;
+        transition-duration: 0.2s;
+        transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
         outline: none !important;
         z-index: 10 !important;
         cursor: text !important;
@@ -14611,7 +14639,9 @@
       /* ---------- 7. 评论输入框与操作控件 (Editor & Forms) ---------- */
       .post-editor-wrapper {
         border-radius: var(--box-border-radius) !important;
-        transition: all 0.25s ease !important;
+        transition-property: border-color, box-shadow;
+        transition-duration: 0.2s;
+        transition-timing-function: ease !important;
       }
       .post-editor-wrapper .post-editor {
         border-radius: var(--box-border-radius) !important;
@@ -14621,7 +14651,9 @@
         background: var(--color-second-bg) !important;
         border: 1px solid var(--color-line) !important;
         padding: 1rem 1.4rem !important;
-        transition: all 0.22s ease !important;
+        transition-property: border-color, box-shadow;
+        transition-duration: 0.2s;
+        transition-timing-function: ease !important;
       }
       .post-editor-wrapper.isFocus .post-editor,
       .post-editor-wrapper .post-editor:focus {
@@ -14631,7 +14663,9 @@
 
       /* 输入框通用 Focus-ring */
       input, textarea {
-        transition: all 0.2s ease !important;
+        transition-property: border-color, box-shadow;
+        transition-duration: 0.18s;
+        transition-timing-function: ease !important;
       }
       input:focus, textarea:focus {
         border-color: var(--v2-primary) !important;
@@ -14646,7 +14680,9 @@
         box-shadow: 0 2px 8px var(--v2-primary-glow) !important;
         border-radius: 8px !important;
         font-weight: 550 !important;
-        transition: all 0.2s ease !important;
+        transition-property: transform, box-shadow, opacity;
+        transition-duration: 0.18s;
+        transition-timing-function: ease !important;
       }
       .base-button.primary:hover:not(.disabled) {
         box-shadow: 0 4px 14px var(--v2-primary-glow) !important;
@@ -14659,7 +14695,9 @@
 
       /* 现代 Switch 开关 */
       .switch {
-        transition: all 0.25s var(--ease-spring) !important;
+        transition-property: background-color, box-shadow;
+        transition-duration: 0.22s;
+        transition-timing-function: var(--ease-spring) !important;
         box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
       }
       .switch.active {
@@ -14736,18 +14774,18 @@
           ? ""
           : `
         .Night .post-item, html.dark .post-item {
-          background: #131d2e !important;
+          background: var(--color-second-bg) !important;
           transition: background-color 0.18s ease;
         }
         .Night .post-item:hover, html.dark .post-item:hover {
-          background-color: #19253a !important;
+          background-color: var(--color-third-bg) !important;
         }
       `
       }
 
       .Night .preview, html.dark .preview {
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          background: rgba(19, 29, 46, 0.7);
+          border: 1px solid var(--v2p-color-border);
+          background: var(--color-second-bg);
       }
       .Night .preview:hover, html.dark .preview:hover {
           border-color: var(--v2-primary-hover);
@@ -14823,7 +14861,9 @@
         cursor: pointer;
         max-width: 100%;
         box-sizing: border-box;
-        transition: all 0.2s ease;
+        transition-property: background-color, color;
+        transition-duration: 0.18s;
+        transition-timing-function: ease;
       }
       .top-reply-parent-context:hover {
         background: var(--color-top-reply-wrap-line, #e2e8f0);
